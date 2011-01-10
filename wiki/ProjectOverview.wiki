@@ -1,0 +1,10 @@
+# This is a brief overview of the project.
+
+= Introduction =
+
+The cxc_templates plugin is a template management solution for Textpattern.
+
+
+= Details =
+
+http://i54.tinypic.com/23ixuyx.jpg

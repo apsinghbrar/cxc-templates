@@ -7,4 +7,4 @@ The cxc_templates plugin is a template management solution for Textpattern.
 
 = Details =
 
-http://i54.tinypic.com/23ixuyx.jpg
+http://cxc-templates.googlecode.com/svn/wiki/assets/preview.jpg

@@ -1,9 +1,10 @@
- * This is a brief overview of the project.
+#The cxc_templates plugin is a template management solution for Textpattern.
 
 = Introduction =
 
-The cxc_templates plugin is a template management solution for Textpattern.
+== Import/Export/Remove/Upload Templates as Files ==
 
+This plugin creates a new Templates tab under Extensions, enabling the trivial export of Forms, Pages, Plugins, Sections, and Style rules to a specified folder for convenient editing, and the subsequent import of new and updated files. Other features include removal of existing template directories, and a template upload option that will upload and import new templates with a single click.
 
 = Details =
 

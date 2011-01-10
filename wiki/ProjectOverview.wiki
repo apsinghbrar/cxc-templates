@@ -1,4 +1,4 @@
-#The cxc_templates plugin is a template management solution for Textpattern.
+#The cxc_templates plugin is a template management solution for the Textpattern website framework.
 
 = Introduction =
 
@@ -9,3 +9,8 @@ This plugin creates a new Templates tab under Extensions, enabling the trivial e
 = Details =
 
 http://cxc-templates.googlecode.com/svn/wiki/assets/preview.jpg
+
+= Credits =
+
+<p>Plugin code based on a modified version of mem_templates by <a href="http://manfre.net/">Michael Manfre</a> that was released with one of <a href="http://thebombsite.com">Stuart Butcher's</a> TXP 4.3.0 templates, which is based off of hcg_templates by <a href="http://txptag.com/">Bert Garcia</a>, which is based off of mcw_templates by <a href="http://mikewest.org/" rel="nofollow">Mike West</a> with additional features introduced to an alternate hcg_templates provided by <a href="http://clueless.com.ar/">Mariano Absatz</a>. </p>
+<p>Without the mentioned plugins and contributions from <strong>all</strong> the above this plugin would not have been made possible. </p>

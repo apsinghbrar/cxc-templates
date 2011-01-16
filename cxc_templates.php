@@ -17,7 +17,7 @@ $plugin['name'] = 'cxc_templates';
 // 1 = Plugin help is in raw HTML.  Not recommended.
 # $plugin['allow_html_help'] = 1;
 
-$plugin['version'] = '0.0.4';
+$plugin['version'] = '0.0.5';
 $plugin['author'] = '~cXc~';
 $plugin['author_uri'] = 'http://gworldz.com';
 $plugin['description'] = 'Template engine for TextPattern 4.3.0 with support for forms, pages, plugins, sections, styles and other template specific assets.';
@@ -1017,11 +1017,11 @@ if (!defined('txpinterface'))
 			if (!empty($prefs['cxc_tpl_current']) && is_dir($tpl_dir)){
 
 				if ($img_size = @getimagesize($tpl_pre.'.gif')) {
-					$tpl_preview = '/'.$this->_config['base_dir'].'/'.$prefs['cxc_tpl_current'].'/preview.gif';
+					$tpl_preview = '../'.$this->_config['base_dir'].'/'.$prefs['cxc_tpl_current'].'/preview.gif';
 				} elseif ($img_size = @getimagesize($tpl_pre.'.jpg')) {
-					$tpl_preview = '/'.$this->_config['base_dir'].'/'.$prefs['cxc_tpl_current'].'/preview.jpg';
+					$tpl_preview = '../'.$this->_config['base_dir'].'/'.$prefs['cxc_tpl_current'].'/preview.jpg';
 				} elseif ($img_size = @getimagesize($tpl_pre.'.png')) {
-					$tpl_preview = '/'.$this->_config['base_dir'].'/'.$prefs['cxc_tpl_current'].'/preview.png';
+					$tpl_preview = '../'.$this->_config['base_dir'].'/'.$prefs['cxc_tpl_current'].'/preview.png';
 				}
 	
 				print '<h2 class="cxc-tpl-capital">'.str_replace('_',' ',$prefs['cxc_tpl_current']).' Template</h2>';
@@ -1051,11 +1051,11 @@ if (!defined('txpinterface'))
 			if (is_dir($tpl_dir)){
 
 				if ($img_size = @getimagesize($tpl_pre.'.gif')) {
-					$tpl_preview = '/'.$this->_config['base_dir'].'/'.$dir.'/preview.gif';
+					$tpl_preview = '../'.$this->_config['base_dir'].'/'.$dir.'/preview.gif';
 				} elseif ($img_size = @getimagesize($tpl_pre.'.jpg')) {
-					$tpl_preview = '/'.$this->_config['base_dir'].'/'.$dir.'/preview.jpg';
+					$tpl_preview = '../'.$this->_config['base_dir'].'/'.$dir.'/preview.jpg';
 				} elseif ($img_size = @getimagesize($tpl_pre.'.png')) {
-					$tpl_preview = '/'.$this->_config['base_dir'].'/'.$dir.'/preview.png';
+					$tpl_preview = '../'.$this->_config['base_dir'].'/'.$dir.'/preview.png';
 				}
 	
 				if ($dir == '') {
@@ -1094,11 +1094,11 @@ if (!defined('txpinterface'))
 				';
 
 				if ($img_size = @getimagesize($tpl_pre.'.gif')) {
-					$tpl_preview = '/'.$this->_config['base_dir'].'/'.$prefs['cxc_tpl_current'].'/preview.gif';
+					$tpl_preview = '../'.$this->_config['base_dir'].'/'.$prefs['cxc_tpl_current'].'/preview.gif';
 				} elseif ($img_size = @getimagesize($tpl_pre.'.jpg')) {
-					$tpl_preview = '/'.$this->_config['base_dir'].'/'.$prefs['cxc_tpl_current'].'/preview.jpg';
+					$tpl_preview = '../'.$this->_config['base_dir'].'/'.$prefs['cxc_tpl_current'].'/preview.jpg';
 				} elseif ($img_size = @getimagesize($tpl_pre.'.png')) {
-					$tpl_preview = '/'.$this->_config['base_dir'].'/'.$prefs['cxc_tpl_current'].'/preview.png';
+					$tpl_preview = '../'.$this->_config['base_dir'].'/'.$prefs['cxc_tpl_current'].'/preview.png';
 				}
 	
 				print '<h2 class="cxc-tpl-capital">Template Preview Image</h2>';
@@ -1315,9 +1315,9 @@ chmod 777 directory
 <p>The &quot;<strong>plugins</strong>&quot; folder contains all plugins included with the template, plugin files not required or part of the template should be removed before sharing your design publicly.</p>
 <p>The &quot;<strong>sections</strong>&quot; folder contains all sections included with the template, section files not required or part of the template should be removed before sharing your design publicly.</p>
 <p>The &quot;<strong>styles</strong>&quot; folder contains all css style sheets included with the template, css files not required or part of the template should be removed before sharing your design publicly.</p>
-<p>The &quot;<strong>DESIGNER.txt</strong>&quot; (<em>optional</em>) file can be used by designers to link to their homepage or advertise additional products and services they offer. This file is not required and will not be displayed unless the user clicks on the &quot;<strong>Additional Information</strong> &lt;/&gt;&quot; area located below allow other results. The &quot;<strong>DESIGNER.txt</strong>&quot; file name is case sensitive and may contain simple html markup.</p>
-<p>The &quot;<strong>README.txt</strong>&quot; (<em>optional</em>) file can be used by designers to display after installation instructions. This file is not required but if present, it will be displayed above all other information during install. The &quot;<strong>README.txt</strong>&quot; file name is case sensitive and may contain simple html markup.</p>
-<p>The &quot;<strong>preview.img</strong>&quot; (<em>optional</em>) file is a image or logo that can be added to display the current template. This file is not required but if present, it will be displayed on the right hand side of the template manager after the first import. The file name and acceptable image formats are &quot;<strong>preview.gif</strong>&quot;, &quot;<strong>preview.jpg</strong>&quot; and &quot;<strong>preview.png</strong>&quot; and is case sensitive.</p>
+<p>The &quot;<strong>DESIGNER.txt</strong>&quot; (<em>optional</em>) file must be located in the templates root directory and can be used by designers to link to their homepage or advertise additional products and services they offer. This file is not required and will not be displayed unless the user clicks on the &quot;<strong>Additional Information</strong> &lt;/&gt;&quot; area located below allow other results. The &quot;<strong>DESIGNER.txt</strong>&quot; file name is case sensitive and may contain simple html markup.</p>
+<p>The &quot;<strong>README.txt</strong>&quot; (<em>optional</em>) file must be located in the templates root directory and can be used by designers to display after installation instructions. This file is not required but if present, it will be displayed above all other information during install. The &quot;<strong>README.txt</strong>&quot; file name is case sensitive and may contain simple html markup.</p>
+<p>The &quot;<strong>preview.img</strong>&quot; (<em>optional</em>) file must be located in the templates root directory and is an image or logo that can be added to display the template previews. This file is not required but if present, it will be displayed on the right hand side of the template manager after the first import. The file name and acceptable image formats are &quot;<strong>preview.gif</strong>&quot;, &quot;<strong>preview.jpg</strong>&quot; and &quot;<strong>preview.png</strong>&quot; and is case sensitive.</p>
 <p><strong>Note:</strong> <em>designers are encouraged to include empty index.html files in all subdirectories of their template to help keep our Textpattern sites secure.</em></p>
 </div>
 

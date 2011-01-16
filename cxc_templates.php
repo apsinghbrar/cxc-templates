@@ -17,7 +17,7 @@ $plugin['name'] = 'cxc_templates';
 // 1 = Plugin help is in raw HTML.  Not recommended.
 # $plugin['allow_html_help'] = 1;
 
-$plugin['version'] = '0.0.3';
+$plugin['version'] = '0.0.4';
 $plugin['author'] = '~cXc~';
 $plugin['author_uri'] = 'http://gworldz.com';
 $plugin['description'] = 'Template engine for TextPattern 4.3.0 with support for forms, pages, plugins, sections, styles and other template specific assets.';
@@ -43,7 +43,7 @@ $plugin['type'] = '1';
 if (!defined('PLUGIN_HAS_PREFS')) define('PLUGIN_HAS_PREFS', 0x0001); // This plugin wants to receive "plugin_prefs.{$plugin['name']}" events
 if (!defined('PLUGIN_LIFECYCLE_NOTIFY')) define('PLUGIN_LIFECYCLE_NOTIFY', 0x0002); // This plugin wants to receive "plugin_lifecycle.{$plugin['name']}" events
 
-$plugin['flags'] = '0';
+$plugin['flags'] = '2';
 
 if (!defined('txpinterface'))
         @include_once('zem_tpl.php');
@@ -82,7 +82,7 @@ if (!defined('txpinterface'))
 /*
 	PLUGIN CODE::INSTANTIATION
 	-------------------------------------------------------------
-*/
+*/	
 	if (@txpinterface == 'admin') {
 		$import = 'cxc_templates';
 		$import_tab = 'Templates';
@@ -90,6 +90,27 @@ if (!defined('txpinterface'))
 		add_privs($import, '1,2');
 		register_tab('extensions', $import, $import_tab);
 		register_callback('cxc_templates', $import);
+		register_callback('cxc_tpl_prep', 'plugin_lifecycle.cxc_templates');
+	}
+
+/*
+	PLUGIN CODE::LIFECYCLE
+	-------------------------------------------------------------
+*/
+	function cxc_tpl_prep($event, $step) {
+		global $prefs;
+		switch ($step) {
+			case 'disabled':
+				if (isset($prefs['cxc_tpl_current'])) {
+					$prep = safe_delete('txp_prefs','name = "cxc_tpl_current"');
+				}
+				break;
+			case 'deleted':
+				if (isset($prefs['cxc_tpl_current'])) {
+					$prep = safe_delete('txp_prefs','name = "cxc_tpl_current"');
+				}
+				break;
+		}
 	}
 
 /*
@@ -104,21 +125,15 @@ if (!defined('txpinterface'))
 		pagetop('Process Templates', '');
 		print '
 		<style type="text/css">
-			.cxc-tpl-boxedup { 
-				display: block;
-				width: 450px; }
+			.cxc-tpl-boxedup { display: block; width: 450px; }
 			.cxc-tpl-success { color: #009900; }
 			.cxc-tpl-failure { color: #FF0000; }
 			.cxc-tpl-capital { text-transform: capitalize; }
-			.cxc-tpl-current {
-				border: medium ridge;
-				float: right;
-				padding: 1em 1em 0;
-				text-align: center;
-				max-width: 300px; }
-			.cxc-tpl-padded {
-				border: 1px solid;
-				padding: 2em; }
+			.cxc-tpl-current { border: medium ridge;float: right; margin: 0 0 0 5px; padding: 1em 1em 0; text-align: center; width: 220px; }
+			.cxc-tpl-preview { background: #fff; border: medium ridge; float: right; margin: 0 0 0 10px; padding: 1em 1em 0; text-align: center; width: 220px; }
+			.cxc-tpl-default { max-height: 200px; overflow: hidden; }
+			.cxc-tpl-padded { border: 1px solid; padding: 2em; }
+			.cxc-tpl-smaller { font-size: 80%; }
 		</style>
 
 		<script type="text/javascript">
@@ -137,25 +152,76 @@ if (!defined('txpinterface'))
 				<td>
 		';
 
+		if (!isset($prefs['cxc_tpl_current']) && !set_pref('cxc_tpl_current', '', 'publish', 2) && !get_pref('cxc_tpl_current')) {
+			print '
+				<h1 class="cxc-tpl-failure">Plugin Preferences</h1>
+				<ul class="results">
+					<li><span class="cxc-tpl-failure">Database update failed</span> entry for current template will be unavailable.</li>
+				</ul>
+				<br />
+			';
+		}
+
 		$theme_dir = $prefs['path_to_site']. DIRECTORY_SEPARATOR .$template->_config['base_dir'];
 		$cache_dir = $prefs['path_to_site']. DIRECTORY_SEPARATOR .$template->_config['cache_dir'];
 		if (is_dir($theme_dir) && is_dir($cache_dir)) {
 
+			$theme_index = $theme_dir. DIRECTORY_SEPARATOR .'index.html';
+			$cache_index = $cache_dir. DIRECTORY_SEPARATOR .'index.html';
+			if (!file_exists($theme_index) || !file_exists($cache_index)) {
+				$template->writeIndexFiles($theme_dir);
+				$template->writeIndexFiles($cache_dir);
+			}
+							
 			switch ($step) {
 				case 'import':
 					$import_full = ps('import_full');
 					$template->import($import_full, ps('import_dir'));
+					$template->writeIndexFiles($theme_dir. DIRECTORY_SEPARATOR .ps('import_dir'));
+					print '
+						<h2><a href="index.php?event=cxc_templates">&#8617; Click here to return to the template manager.</a></h2>
+					';
 					break;
 
 				case 'export':
 					$dir = ps('export_dir');
 
 					$dir =  str_replace(
-								array(" "),
-								array("-"),
+								array(' '),
+								array('-'),
 								$dir
 							);
 					$template->export($dir);
+					$template->writeIndexFiles($theme_dir. DIRECTORY_SEPARATOR .ps('export_dir'));
+					print '
+						<h2><a href="index.php?event=cxc_templates">&#8617; Click here to return to the template manager.</a></h2>
+					';
+					break;
+
+				case 'rusure':
+					$dir = $theme_dir. DIRECTORY_SEPARATOR .ps('remove_dir');
+					if (ps('remove_dir') != 'preimport-data') {
+						$tpl_dir = $prefs['path_to_site']. DIRECTORY_SEPARATOR .$template->_config['base_dir']. DIRECTORY_SEPARATOR .ps('remove_dir');
+						if (is_dir($tpl_dir)) {
+							print '<div class="cxc-tpl-current">';
+							$template->cxc_tpl_current($tpl_dir);
+							print '</div>';
+						}
+					}
+
+					print '
+						<h1 class="cxc-tpl-failure">Delete Directory Confirmation</h1>
+						<p>This will completely remove the "<strong>'.$dir.'</strong>" directory from your site, click "<strong>GO</strong>" to continue or use the link below to return to the template manager.</p>
+						'.form(
+							graf(''.
+								hInput('remove_dir',ps('remove_dir')).' '.
+								fInput('submit', 'go', 'Go', 'smallerbox').
+								eInput('cxc_templates').sInput('remove')
+							)
+						).'
+						<h2><a href="index.php?event=cxc_templates">&#8617; Click here to return to the template manager.</a></h2>
+						';
+
 					break;
 
 				case 'remove':
@@ -165,7 +231,7 @@ if (!defined('txpinterface'))
 						foreach ($objects as $object) {
 							if ($object != '.' && $object != '..') {
 								if (is_dir($dir. DIRECTORY_SEPARATOR .$object)) {
-									$template->remove($dir. DIRECTORY_SEPARATOR .$object);
+									$template->removeDirectory($dir. DIRECTORY_SEPARATOR .$object);
 								} else { 
 									@unlink($dir. DIRECTORY_SEPARATOR .$object);
 								}
@@ -177,14 +243,17 @@ if (!defined('txpinterface'))
 					if (!is_dir($dir)){					
 						print '
 							<h1 class="cxc-tpl-success"><span class="cxc-tpl-capital">'.str_replace('_', ' ', ps('remove_dir')).'</span> Template Removed</h1>
-							<p><a href="index.php?event=cxc_templates">Click here to return to the template manager.</a></p>
+							<p>The <span class="cxc-tpl-capital">'.str_replace('_', ' ', ps('remove_dir')).'</span> template directory has been removed from the "'.$template->_config['base_dir'].'" directory.</p>
 						';
 					} else {
 						print '
 							<h1 class="cxc-tpl-failure">Unable to Remove Template</h1>
-							<p><a href="index.php?event=cxc_templates">Click here to return to the template manager.</a></p>
+							<p>The <span class="cxc-tpl-capital">'.str_replace('_', ' ', ps('remove_dir')).'</span> template directory was not removed, this might be due to the server configuration of your host and removal of templates may need to be done manually</p>
 						';
 					}
+					print '
+						<h2><a href="index.php?event=cxc_templates">&#8617; Click here to return to the template manager.</a></h2>
+					';
 					break;
 
 				case 'importZip':
@@ -200,6 +269,7 @@ if (!defined('txpinterface'))
 					if ($adv_live){
 						if ($newtpl != '' && count($newtpl) == 1) {
 							$template->import($import_full, $newtpl[0]);
+							$template->writeIndexFiles($theme_dir. DIRECTORY_SEPARATOR .$newtpl[0]);
 						} else {
 							print '
 								<h1>Template Import: <span class="cxc-tpl-capital">'.str_replace('_', ' ', str_replace('.zip', '', $_FILES['file']['name'])).'</span></h1>
@@ -211,17 +281,38 @@ if (!defined('txpinterface'))
 							';
 						}
 					}
+					print '
+						<h2><a href="index.php?event=cxc_templates">&#8617; Click here to return to the template manager.</a></h2>
+					';
+					break;
+
+				case 'docs':
+					$template->cxc_tpl_docs($prefs['cxc_tpl_current']);
+					print '
+						<h2><a href="index.php?event=cxc_templates">&#8617; Click here to return to the template manager.</a></h2>
+					';
+					break;
+
+				case 'downzip':
+					$zipdir	= ps('zip_dir');
+					$stripz	= $prefs['path_to_site']. DIRECTORY_SEPARATOR .$template->_config['base_dir']. DIRECTORY_SEPARATOR;
+					$template->writeIndexFiles($theme_dir. DIRECTORY_SEPARATOR .$zipdir);
+					$template->cxc_tpl_downzip($theme_dir. DIRECTORY_SEPARATOR .$zipdir, $zipdir.'.zip', $stripz);
+					print '
+						<h2><a href="index.php?event=cxc_templates">&#8617; Click here to return to the template manager.</a></h2>
+					';
 					break;
 
 				default:
 					$importlist = $template->getTemplateList();
 
-					if (file_exists($theme_dir. DIRECTORY_SEPARATOR .'current.tpl')){
-						print '
-						<div class="cxc-tpl-current">'.
-							file_get_contents($theme_dir. DIRECTORY_SEPARATOR .'current.tpl').'
-						</div>
-						';
+					if (!empty($prefs['cxc_tpl_current']) && $prefs['cxc_tpl_current'] != 'preimport-data') {
+						$tpl_dir = $prefs['path_to_site']. DIRECTORY_SEPARATOR .$template->_config['base_dir']. DIRECTORY_SEPARATOR .$prefs['cxc_tpl_current'];
+						if (is_dir($tpl_dir)) {
+							print '<div class="cxc-tpl-current">';
+							$template->cxc_tpl_current($tpl_dir);
+							print '</div>';
+						}
 					}
 
 					if (empty($importlist) || $importlist == '') {
@@ -243,10 +334,9 @@ if (!defined('txpinterface'))
 						print '
 							<h1>Import Template</h1>
 						'.form(
-							graf('Please select the template you would like to import.'.' <br />'.
+							graf('Which template would you like to import?'.' <br />'.
 								selectInput('import_dir', $importlist, '', 1).' <br />'.
-								checkbox('import_full', 'import_full', '0', '', 'import_full').' Use Import Safe Mode (<em class="cxc-tpl-failure">non-destructive</em>) <br />
-								<span class="cxc-tpl-boxedup"><strong>Note:</strong> <em>this option only adds <strong>new</strong> forms, pages, sections and styles used by the template, it will not change existing database entries.</em></span>'.
+								checkbox('import_full', 'import_full', '0', '', 'import_full').' Use Import Safe Mode (<em class="cxc-tpl-failure">non-destructive</em>) <br />'.
 								fInput('submit', 'go', 'Go', 'smallerbox').
 								eInput('cxc_templates').sInput('import')
 							)
@@ -256,8 +346,8 @@ if (!defined('txpinterface'))
 					print '
 						<h1>Export Template</h1>	
 					'.form(
-						graf('Please select a name for the exported template.'.' <br />'.
-							fInput('text', 'export_dir', '').' '.
+						graf('Choose a name for the exported template.'.' <br />'.
+							fInput('text', 'export_dir', '').
 							fInput('submit', 'go', 'Go', 'smallerbox').
 							eInput('cxc_templates').sInput('export')
 						)
@@ -270,7 +360,19 @@ if (!defined('txpinterface'))
 							graf(''.
 								selectInput('remove_dir', $importlist, '', 1).' '.
 								fInput('submit', 'go', 'Go', 'smallerbox').
-								eInput('cxc_templates').sInput('remove')
+								eInput('cxc_templates').sInput('rusure')
+							)
+						);
+					}
+
+					if (!empty($importlist) && !$importlist == '') {
+						print '
+							<h1>Zip Project Folder</h1>
+						'.form(
+							graf(''.
+								selectInput('zip_dir', $importlist, '', 1).' '.
+								fInput('submit', 'go', 'Go', 'smallerbox').
+								eInput('cxc_templates').sInput('downzip')
 							)
 						);
 					}
@@ -281,11 +383,9 @@ if (!defined('txpinterface'))
 						graf('Please select the template you would like to upload.'.' <br />'.
 							fInput('file', 'file', '', '', '', '',50,'','file').
 							eInput('cxc_templates').sInput('importZip').' <br />'.
-							checkbox('adv_live', 'adv_live', '1', '', 'adv_live').' Install Uploaded Template <br />
-							<span class="cxc-tpl-boxedup"><strong>Note:</strong> <em>this option will import the template after it is uploaded.</em></span>'.
-							checkbox('import_full', 'import_full', '0', '', 'import_full').'  Use Installation Safe Mode (<em class="cxc-tpl-failure">non-destructive</em>) <br />
-							<span class="cxc-tpl-boxedup"><strong>Note:</strong> <em>this option is only applied if the above option is also selected, it only adds <strong>new</strong> forms, pages, sections and styles used by the template.</em></span>
-							<span class="cxc-tpl-slide-head cxc-tpl-boxedup"><a name="upload-advanced-options">Advanced Options</a> &lt;/&gt;</span>
+							checkbox('adv_live', 'adv_live', '1', '', 'adv_live').' Import Uploaded Template <br />'.
+							checkbox('import_full', 'import_full', '0', '', 'import_full').' Use Import Safe Mode (<em class="cxc-tpl-failure">non-destructive</em>) <br />
+							<span class="cxc-tpl-slide-head cxc-tpl-boxedup"><a id="upload-advanced-options">Advanced Options</a> &lt;/&gt;</span>
 							<span class="cxc-tpl-slide-body cxc-tpl-boxedup">'.
 								checkbox('adv_root', 'adv_root', '0', '', 'adv_root').' Web Root Installation (<em class="cxc-tpl-failure">not recommended</em>) <br />
 								<strong>Note:</strong> <em>do not use unless required or you know what you are doing!</em>
@@ -318,6 +418,7 @@ if (!defined('txpinterface'))
 						<pre><code>    mkdir '.$theme_dir.'\n    chmod 777 '.$theme_dir.'</code></pre>
 						<p>After you have created the missing directories, return to (or reload) this page to display the template manager.</p>
 						<p>For additional security you may also want to include empty index.html files or adjust your .htaccess for these directories.</p>
+						<h2><a href="index.php?event=cxc_templates">&#8617; Click here to return to the template manager.</a></h2>
 					';
 				} else {
 					if (!is_dir($theme_dir)){
@@ -334,6 +435,7 @@ if (!defined('txpinterface'))
 						<pre><code>    mkdir '.$missing_dir.'\n    chmod 777 '.$missing_dir.'</code></pre>
 						<p>After you have created the missing directory, return to (or reload) this page to display the template manager.</p>
 						<p>For additional security you may also want to include empty index.html files or adjust your .htaccess for the directory.</p>
+						<h2><a href="index.php?event=cxc_templates">&#8617; Click here to return to the template manager.</a></h2>
 					';
 				}
 			}
@@ -545,7 +647,7 @@ if (!defined('txpinterface'))
 			}
 
 			print '
-				<h1 class="cxc-tpl-slide-head"><a name="exporting-details" title="Click here to open/close detailed list of export events.">Template Export: Current</a> &lt;/&gt;</h1>
+				<h1 class="cxc-tpl-slide-head"><a id="exporting-details" title="Click here to open/close detailed list of export events.">Template Export: Current</a> &lt;/&gt;</h1>
 				<div class="cxc-tpl-slide-body">
 				<blockquote>
 			';
@@ -688,7 +790,14 @@ if (!defined('txpinterface'))
 							$this->_config['full_base_path'],
 							$dir
 						);
-			$this->writeCurrentImport('current.tpl', $dir);
+			if (!set_pref('cxc_tpl_current', $dir, 'publish', 2)){
+				print '
+					<ul class="results">
+						<li><span class="cxc-tpl-failure">Unable to update</span> entry for current template in the database, '.str_replace('_', ' ', $dir).' template information will be unavailable.</li>
+					</ul>
+					<br />
+				';
+			}
 			if (file_exists($basedir. DIRECTORY_SEPARATOR .'README.txt')){
 				print '
 				<div>'.
@@ -710,7 +819,7 @@ if (!defined('txpinterface'))
 			$this->export('preimport-data');
 
 			print '
-				<h1 class="cxc-tpl-slide-head"><a name="additional-info" title="Click here to open/close detailed list of import events.">Template Import: <span class="cxc-tpl-capital">'.str_replace('_', ' ', $dir).'</span></a> &lt;/&gt;</h1>
+				<h1 class="cxc-tpl-slide-head"><a id="importing-details" title="Click here to open/close detailed list of import events.">Template Import: <span class="cxc-tpl-capital">'.str_replace('_', ' ', $dir).'</span></a> &lt;/&gt;</h1>
 				<div class="cxc-tpl-slide-body">
 				<blockquote>
 			';
@@ -772,7 +881,7 @@ if (!defined('txpinterface'))
 										$result = safe_insert($config['table'], $set.', `name` = "'.$templateName.'"');
 									}
 								} else {
-									$result = 0;
+									$result = 1;
 								}
 								$success = ($result)?1:0;
 							} else {
@@ -824,47 +933,11 @@ if (!defined('txpinterface'))
 			';
 			if (file_exists($basedir. DIRECTORY_SEPARATOR .'DESIGNER.txt')){
 				print '
-				<h1 class="cxc-tpl-slide-head" title="Click here to see additional information from the imported templates designer."><a name="additional-info">Additional Information</a> &lt;/&gt;</h1>
+				<h1 class="cxc-tpl-slide-head" title="Click here to see additional information from the imported templates designer."><a id="additional-info">Additional Information</a> &lt;/&gt;</h1>
 				<div class="cxc-tpl-slide-body">'.
 					file_get_contents($basedir. DIRECTORY_SEPARATOR .'DESIGNER.txt').'
 				</div>
 				';
-			}
-		}
-
-		function writeCurrentImport($filename, $current){
-			global $prefs;
-
-			$tpl_path = $prefs['path_to_site']. DIRECTORY_SEPARATOR .$this->_config['base_dir']. DIRECTORY_SEPARATOR .$current. DIRECTORY_SEPARATOR .'preview';
-			
-			if ($img_size = @getimagesize($tpl_path.'.gif')) {
-				$tpl_preview = '/'.$this->_config['base_dir'].'/'.$current.'/preview.gif';
-			} elseif ($img_size = @getimagesize($tpl_path.'.jpg')) {
-				$tpl_preview = '/'.$this->_config['base_dir'].'/'.$current.'/preview.jpg';
-			} elseif ($img_size = @getimagesize($tpl_path.'.png')) {
-				$tpl_preview = '/'.$this->_config['base_dir'].'/'.$current.'/preview.png';
-			}
-
-			$data	= '<h2 class="cxc-tpl-capital">Current Template: '.str_replace('_',' ',$current).'</h2>';
-			if (isset($tpl_preview)) {
-				$data	.= '<p><img src="/'.$this->_config['base_dir'].'/'.$current.'/preview.jpg" width="200px" alt="'.str_replace('_',' ',$current).' Template Preview" /></p>';
-			} else {
-				$data	.= '<p class="cxc-tpl-padded">No Preview Image Available</p>';
-			}
-			$data	.= '<p>(<em><span class="cxc-tpl-capital">'.str_replace('_',' ',$current).'</span> was the last template imported</em>)</p>';
-
-			$f = @fopen($filename, 'w+');
-			if ($f) {
-				fwrite($f,$data);
-				fclose($f);
-			}
-			$cur_tpl = $prefs['path_to_site']. DIRECTORY_SEPARATOR .$this->_config['base_dir']. DIRECTORY_SEPARATOR .$filename;
-			if (file_exists($cur_tpl)) {
-				unlink($cur_tpl);
-			}
-			copy($prefs['path_to_site']. DIRECTORY_SEPARATOR .'textpattern'. DIRECTORY_SEPARATOR .$filename, $cur_tpl);
-			if (file_exists($filename)) {
-				unlink($filename);
 			}
 		}
 
@@ -890,33 +963,16 @@ if (!defined('txpinterface'))
 			if ($zip->open($full_temp_dir) === TRUE) {
 				$zip->extractTo($templates_base_dir);
 				$zip->close();
-				unlink($full_temp_dir);
+				@unlink($full_temp_dir);
 				print '<li><span class="cxc-tpl-success">Successfully uploaded</span> file "'.$fileName.'"</li>';
 			} else {
-				unlink($full_temp_dir);
+				@unlink($full_temp_dir);
 				print '<li><span class="cxc-tpl-failure">Failed uploading</span> file "'.$fileName.'"</li>';
 			}
 			print '
 				</ul>
 				<br />
 			';
-		}
-
-		function remove($dir) {
-			if (is_dir($dir)) {
-				$objects = scandir($dir);
-				foreach ($objects as $object) {
-					if ($object != '.' && $object != '..') {
-						if (is_dir($dir. DIRECTORY_SEPARATOR .$object)) {
-							$this->remove($dir."/".$object);
-						} else { 
-							@unlink($dir. DIRECTORY_SEPARATOR .$object);
-						}
-					}
-				}
-				reset($objects);
-				@rmdir($dir);
-			}
 		}
 
 		function parseSectionFile($sql,$data,$fname,$ext) {
@@ -944,23 +1000,198 @@ if (!defined('txpinterface'))
 			$sectionLine = sprintf($sql, $sectionValues['page'], $sectionValues['css'], $sectionValues['is_default'], $sectionValues['in_rss'], $sectionValues['on_frontpage'], $sectionValues['searchable'], $sectionValues['title']);
 			return $sectionLine;
 		}
+
+		/*
+			OTHER FUNCTIONS
+			----------------------------------------------------------
+		*/
+
+		function cxc_tpl_current($tpl_dir){
+			global $prefs;
+
+			$tpl_pre = $tpl_dir. DIRECTORY_SEPARATOR .'preview';
+			$tpl_alt = str_replace('_',' ',$prefs['cxc_tpl_current']).' Template Preview';
+			$readme = $tpl_dir. DIRECTORY_SEPARATOR .'README.txt';
+			$design = $tpl_dir. DIRECTORY_SEPARATOR .'DESIGNER.txt';
+			
+			if (!empty($prefs['cxc_tpl_current']) && is_dir($tpl_dir)){
+
+				if ($img_size = @getimagesize($tpl_pre.'.gif')) {
+					$tpl_preview = '/'.$this->_config['base_dir'].'/'.$prefs['cxc_tpl_current'].'/preview.gif';
+				} elseif ($img_size = @getimagesize($tpl_pre.'.jpg')) {
+					$tpl_preview = '/'.$this->_config['base_dir'].'/'.$prefs['cxc_tpl_current'].'/preview.jpg';
+				} elseif ($img_size = @getimagesize($tpl_pre.'.png')) {
+					$tpl_preview = '/'.$this->_config['base_dir'].'/'.$prefs['cxc_tpl_current'].'/preview.png';
+				}
+	
+				print '<h2 class="cxc-tpl-capital">'.str_replace('_',' ',$prefs['cxc_tpl_current']).' Template</h2>';
+				if (isset($tpl_preview)) {
+					print '<p class="cxc-tpl-default"><img src="'.$tpl_preview.'" width="200px" height="auto" alt="'.$tpl_alt.'" /></p>';
+				} else {
+					print '<p class="cxc-tpl-padded">No Preview Image Available</p>';
+				}
+				if (file_exists($readme) || file_exists($design)) {
+					print form(''.
+							graf(
+								fInput('submit', 'go', 'Template Documentation', 'smallerbox').
+								eInput('cxc_templates').sInput('docs')
+							)
+					);
+				} else {
+					print '<p class="cxc-tpl-smaller">(<em><span class="cxc-tpl-capital">'.str_replace('_',' ',$prefs['cxc_tpl_current']).'</span> was the last template imported</em>)</p>';					
+				}
+			}
+		}
+
+		function cxc_tpl_docs($tpl_dir){
+			global $prefs;
+
+			$basedir =  sprintf(
+							'%s'. DIRECTORY_SEPARATOR .'%s',
+							$this->_config['full_base_path'],
+							$tpl_dir
+						);
+			$tpl_dir = $prefs['path_to_site']. DIRECTORY_SEPARATOR .$this->_config['base_dir']. DIRECTORY_SEPARATOR .$prefs['cxc_tpl_current'];
+			$tpl_pre = $tpl_dir. DIRECTORY_SEPARATOR .'preview';
+			$tpl_alt = str_replace('_',' ',$prefs['cxc_tpl_current']).' Template Preview';
+			$readme = $basedir. DIRECTORY_SEPARATOR .'README.txt';
+			$design = $basedir. DIRECTORY_SEPARATOR .'DESIGNER.txt';
+
+			if (!empty($prefs['cxc_tpl_current']) && $prefs['cxc_tpl_current'] != 'preimport-data') {
+				print '
+					<div class="cxc-tpl-preview">
+				';
+
+				if ($img_size = @getimagesize($tpl_pre.'.gif')) {
+					$tpl_preview = '/'.$this->_config['base_dir'].'/'.$prefs['cxc_tpl_current'].'/preview.gif';
+				} elseif ($img_size = @getimagesize($tpl_pre.'.jpg')) {
+					$tpl_preview = '/'.$this->_config['base_dir'].'/'.$prefs['cxc_tpl_current'].'/preview.jpg';
+				} elseif ($img_size = @getimagesize($tpl_pre.'.png')) {
+					$tpl_preview = '/'.$this->_config['base_dir'].'/'.$prefs['cxc_tpl_current'].'/preview.png';
+				}
+	
+				print '<h2 class="cxc-tpl-capital">Template Preview Image</h2>';
+				if (isset($tpl_preview)) {
+					print '<p><img src="'.$tpl_preview.'" width="200px" height="auto" alt="'.$tpl_alt.'" /></p>';
+				} else {
+					print '<p class="cxc-tpl-padded">No Preview Image Available</p>';
+				}
+				print '
+					<br />
+					</div>
+				';
+			}
+			if (file_exists($readme)){
+				print '
+					<div>'.
+						file_get_contents($readme).'
+					</div>
+					<br />
+				';
+			}
+			if (file_exists($design)){
+				print '
+					<h1>Additional Information</h1>
+					<div>'.
+						file_get_contents($design).'
+					</div>
+					<br />
+				';
+			}			
+		}
+
+		function cxc_tpl_downzip($folder, $to='archive.zip', $basedir) {
+			$zip = new ZipArchive();
+			if ($zip->open($to, ZIPARCHIVE::CREATE)) {
+				$found = array(rtrim($folder,DIRECTORY_SEPARATOR.'\/'));
+				while ($path = each($found)) {
+					$path = current($path);
+					if (is_dir($path)) {
+						//$zip->addEmptyDir(substr($path, strlen($basedir)));
+						foreach (scandir($path) as $subpath) {
+							if ($subpath=='.'||$subpath=='..'||substr($subpath,-2)==DIRECTORY_SEPARATOR.'.'||substr($subpath,-3)==DIRECTORY_SEPARATOR.'..') continue;
+							$found[] = $path.DIRECTORY_SEPARATOR.$subpath;
+						}
+					} else {
+						$zip->addFile($path, substr($path, strlen($basedir)));
+					}
+				}
+				if ($zip->close()) {
+					header ("Content-Type: application/zip");
+					header ("Content-Disposition: attachment; filename=$to");
+					header ("Pragma: no-cache");
+					header ("Expires: 0");
+					if (!readfile($to)){
+						print 'Error, there was a problem creating the zip file for the template directory.';
+					}
+					if (!unlink($to)) {
+						print 'Error, there was a problem removing the zip file after the download.';
+					}
+		
+					return true;
+				} else {
+					print 'Error, could not finalise the archive.';
+				}
+			} else {
+				print 'Error, could not create a zipfile at '.$to;
+			}
+			return false;
+		}
+
+		function removeDirectory($dir) {
+			if (is_dir($dir)) {
+				$objects = scandir($dir);
+				foreach ($objects as $object) {
+					if ($object != '.' && $object != '..') {
+						if (is_dir($dir. DIRECTORY_SEPARATOR .$object)) {
+							$this->removeDirectory($dir.'/'.$object);
+						} else { 
+							@unlink($dir. DIRECTORY_SEPARATOR .$object);
+						}
+					}
+				}
+				reset($objects);
+				@rmdir($dir);
+			}
+		}
+
+		function writeIndexFiles($dir) {
+			if (is_dir($dir)) {
+				if (!file_exists($dir. DIRECTORY_SEPARATOR .'index.html')) {
+					$f = @fopen($dir. DIRECTORY_SEPARATOR .'index.html', 'x+');
+					if ($f) {
+						fwrite($f,'<html><body bgcolor="#FFFFFF"></body></html>');
+						fclose($f);
+					}
+				}
+				$objects = scandir($dir);
+				foreach ($objects as $object) {
+					if ($object != '.' && $object != '..') {
+						if (is_dir($dir. DIRECTORY_SEPARATOR .$object)) {
+							$this->writeIndexFiles($dir.'/'.$object);
+						}
+					}
+				}
+				reset($objects);
+			}
+		}
 	} 
 # --- END PLUGIN CODE ---
 if (0) {
 ?>
 <!--
 # --- BEGIN PLUGIN HELP ---
-<h1>Import/Export/Remove/Upload Templates as Files</h1>
-<p>This plugin creates a new <strong>Templates</strong> tab under <strong>Extensions</strong>, enabling the trivial export of<strong> Forms</strong>, <strong>Pages</strong>, <strong>Plugins</strong>, <strong>Sections</strong>, and <strong>Style</strong> rules to a specified folder for convenient editing, and the subsequent import of new and updated files. Other features include removal of existing template directories, and a template upload option that will upload and import new templates with a single click.</p>
+<h1>Import/Export/Remove/Download/Upload Templates as Files</h1>
+<p>This plugin creates a new <strong>Templates</strong> tab under <strong>Extensions</strong>, enabling the trivial export of<strong> Forms</strong>, <strong>Pages</strong>, <strong>Plugins</strong>, <strong>Sections</strong>, and <strong>Style</strong> rules to a specified folder for convenient editing, and the subsequent import of new and updated files. Existing template directories, as well as, the $cxc_templates[&#8217;base_dir&#8217;] can be deleted. Please note, the $cxc_templates[&#8217;base_dir&#8217;] will be recreated when the plugin is next accessed. Other features include zip and download of template directories, and a template upload option that will upload and import new templates with a single click.</p>
 
-<h2 class="cxc-tpl-slide-head"><a name="plugin-requirements">Plugin Requirements</a> &lt;/&gt;</h2>
+<h2 class="cxc-tpl-slide-head"><a id="plugin-requirements">Plugin Requirements</a> &lt;/&gt;</h2>
 <div class="cxc-tpl-slide-body">
 <p>This plugin requires Textpattern <strong>4.3.0</strong> and above.</p>
 <p>Regardless of where it&#8217;s been tested, this plugin messes around with your database.</p>
 <p><em>Do not use it without backing up your database</em>.</p>
 </div>
 
-<h2 class="cxc-tpl-slide-head"><a name="setup-instructions">Setup Instructions</a> &lt;/&gt;</h2>
+<h2 class="cxc-tpl-slide-head"><a id="setup-instructions">Setup Instructions</a> &lt;/&gt;</h2>
 <div class="cxc-tpl-slide-body">
 <p>By default, the plugin looks for directories named <strong>cache</strong> and <strong>tpl</strong> in the directory with images, rpc, sites, and textpattern directories. If the directories don&#8217;t exist, the plugin will attempt to create it the first time you export your templates. This creation will often fail, if that occurs, you&#8217;ll need to create the directories manually, and ensure that the web server has write access.</p>
 <p>If your Textpattern root is located at <strong>/users/home/myuser/web/public/</strong>, something similar to the following commands could be used:</p>
@@ -972,24 +1203,25 @@ chmod 777 directory
 <p><strong>Note:</strong> <em>if using an alternate template directory you will need to adjust accordingly.</em></p>
 </div>
 
-<h2 class="cxc-tpl-slide-head"><a name="usage-instructions">Usage Instructions</a> &lt;/&gt;</h2>
+<h2 class="cxc-tpl-slide-head"><a id="usage-instructions">Usage Instructions</a> &lt;/&gt;</h2>
 <div class="cxc-tpl-slide-body">
-<p><strong>Import</strong> &#8211; select a template to import from the dropdown on the <strong>Templates</strong> tab and press <em>Go</em>. Before importing, the plugin will do an export of your currently installed templates to a folder called. If this is not your first install this may overwrite the current template backup located in <strong>preimport-data</strong>.</p>
+<p><strong>Import Template</strong>&#8211; select a template to import from the dropdown on the <strong>Templates</strong> tab and press <em>Go</em>. Before importing, the plugin will do an export of your currently installed templates to a folder called. If this is not your first install this may overwrite the current template backup located in <strong>preimport-data</strong>.</p>
 <p><strong>Safe Mode</strong> &#8211; allows you to import a template with out overwriting any existing database entries. When this setting is enabled the plugin will skip importing the forms, pages, sections and styles if the database already contains an entry with the same name and only import new entries. This setting will usually require additional editing and is turned off by default.</p>
-<p><strong>Export</strong> &#8211; is achieved by typing in an export name and pressing <em>Go</em>. Keep in mind naming an export the same as an exisiting template directory will overwrite the contents and that the assets folder is not created. This is done for two reasons ...</p>
+<p><strong>Export Template</strong> &#8211; is achieved by typing in an export name and pressing <em>Go</em>. Keep in mind naming an export the same as an exisiting template directory will overwrite the contents and that the assets folder is not created. This is done for two reasons ...</p>
 <ol>
     <li>The system is completely unaware of which template you are using and there isn&#8217;t a meta file to tell the plugin what assets to clone or where to find them.</li>
     <li>Even if the above was added to the plugin, cloned templates would need to edit the exported files to change resource directories used for css, images, and js.</li>
 </ol>
 <p>... that doesn&#8217;t mean it can&#8217;t be added, only that for now it doesn&#8217;t work that way.</p>
-<p><strong>Delete</strong> &#8211; select a template to remove from the dropdown on the <strong>Templates</strong> tab and press <em>Go</em>. This will remove the template directory from your site, if this feature is unable to remove templates it is usually due to the server configuration of your host and removal of templates will need to be done manually<strong></strong>.</p>
-<p><strong>Upload</strong> &#8211; use the browse button to locate a template zip file you have and press <em>Go</em>. Keep in mind uploading a templates zip file with a template of the same name as an exisiting folder will overwrite the contents of the existing folder. Uploaded templates are extracted to the templates directory and can then be imported using the Import feature of the plugin.</p>
+<p><strong>Delete Template</strong> &#8211; select a template to remove from the dropdown on the <strong>Templates</strong> tab and press <em>Go</em>. Follow the instructions on the <strong>Delete Directory Confirmation</strong> page to remove the selected template directory from your site, if no template is selected from the dropdown list the entire templates directory will be removed. If this feature is unable to remove templates it is usually due to the server configuration of your host and removal of templates will need to be done manually.</p>
+<p><strong>Zip Project Folder</strong> &#8211; select a template directory to zip from the dropdown on the <strong>Templates</strong> tab and press <em>Go</em>. This will zip the entire template directory and force download of the template, once downloaded you can extract the contents and remove files that are unecessary. This is mostly a feature to help designers share their templates, downloaded zip files must be extracted and rezipped before they can be used with the upload feature. If this feature is unable to zip the template directory it is usually due to the server configuration of your host and downlpad of templates will not be possible<strong></strong>.</p>
+<p><strong>Upload Template</strong> &#8211; use the browse button to locate a template zip file you have and press <em>Go</em>. Keep in mind uploading a templates zip file with a template of the same name as an exisiting folder will overwrite the contents of the existing folder. Uploaded templates are extracted to the templates directory and can then be imported using the Import feature of the plugin.</p>
 <p><strong>Advanced</strong> &#8211; this area will allow you to do a webroot template installation and is not recommended unless instructed to by the template designer <strong></strong>or you know hwat you are doing. This feature can be used for support files or common files used by designers that must be in the webroot to function properly. When using this method for installation the uploaded zip file will be extracted directly into teh webroot and will overwrite existing files of the same name.</p>
 </div>
 
-<h2 class="cxc-tpl-slide-head"><a name="designing-templates">Designing Templates</a> &lt;/&gt;</h2>
+<h2 class="cxc-tpl-slide-head"><a id="designing-templates">Designing Templates</a> &lt;/&gt;</h2>
 <div class="cxc-tpl-slide-body">
-<p class="cxc-tpl-slide-head">The following <a name="naming_conventions" id="naming_conventions">file naming conventions</a> &lt;/&gt; are recommended to designers:</p>
+<p class="cxc-tpl-slide-head">The following <a id="file-naming-conventions">file naming conventions</a> &lt;/&gt; are recommended to designers:</p>
 <div class="cxc-tpl-slide-body preview">
     <p>Default pages, forms and styles should be prefaced with the design’s name.</p>
     <ul>
@@ -1006,7 +1238,7 @@ chmod 777 directory
         <li>Styles → .css  </li>
     </ul>
 </div>
-<p class="cxc-tpl-slide-head">This is <a name="folder-structure" title="Click to view example template directory structure">the folder and subfolders structure</a> &lt;/&gt; used for template creation:</p>
+<p class="cxc-tpl-slide-head">This is <a id="suggested-folder-structure" title="Click to view example template directory structure">the folder and subfolders structure</a> &lt;/&gt; used for template creation:</p>
 <div class="cxc-tpl-slide-body preview">
     <ul>
         <li>tpl<ul>
@@ -1044,14 +1276,14 @@ chmod 777 directory
       </ul></li>
     </ul>
 </div>
-<p>The default templates directory is the &quot;<strong>tpl</strong>&quot; directory, but in the past &quot;_templates&quot; was used and some templates may still require you to use it (or another) directory. I hope everyone will adopt the use of the &quot;<strong>tpl</strong>&quot; directory but I'm not forcing it on anyone. Please note, it is possible to have and use multiple template directories on a single site, but only templates existing in the directory set as $cxc_templates['base_dir'] will be used to display available templates.</p>
+<p>The default templates directory is the &quot;<strong>tpl</strong>&quot; directory, but in the past &quot;_templates&quot; was used and some templates may still require you to use it (or another) directory. I hope everyone will adopt the use of the &quot;<strong>tpl</strong>&quot; directory but I&#8217;m not forcing it on anyone. Please note, it is possible to have and use multiple template directories on a single site, but only templates existing in the directory set as $cxc_templates[&#8217;base_dir&#8217;] will be used to display available templates.</p>
 <p>You will need to replace &quot;<strong>THEME_NAME</strong>&quot; with the name of the template you are designing. The name of the template folder should be lower-cased and alpha numeric (can contain hyphens &quot;-&quot; and underscores &quot;_&quot;). Technically it does not have to be lower-cased but it is definitely the standard since asset links are case-sensitive.</p>
 <p>The &quot;<strong>assets</strong>&quot; folder is not required nor are the sub-directories, I added them with organization in mind, it is simply a design choice. The concept is that all support files (css, images, js, and other files) could be placed in this folder (or another folder below the <strong>THEME_NAME</strong> directory) instead of requiring an advanced install into the webroot.</p>
-<p>The &quot;<strong>forms</strong>&quot; folder contains all forms required by the template.</p>
-<p>The &quot;<strong>pages</strong>&quot; folder contains all pages required by the template.</p>
-<p>The &quot;<strong>plugins</strong>&quot; folder contains all plugins required by the template.</p>
-<p>The &quot;<strong>sections</strong>&quot; folder contains all sections required by the template.</p>
-<p>The &quot;<strong>styles</strong>&quot; folder contains all css style sheets required by the template.</p>
+<p>The &quot;<strong>forms</strong>&quot; folder contains all forms included with the template, form files not required or part of the template should be removed before sharing your design publicly.</p>
+<p>The &quot;<strong>pages</strong>&quot; folder contains all pages included with the template, page files not required or part of the template should be removed before sharing your design publicly.</p>
+<p>The &quot;<strong>plugins</strong>&quot; folder contains all plugins included with the template, plugin files not required or part of the template should be removed before sharing your design publicly.</p>
+<p>The &quot;<strong>sections</strong>&quot; folder contains all sections included with the template, section files not required or part of the template should be removed before sharing your design publicly.</p>
+<p>The &quot;<strong>styles</strong>&quot; folder contains all css style sheets included with the template, css files not required or part of the template should be removed before sharing your design publicly.</p>
 <p>The &quot;<strong>DESIGNER.txt</strong>&quot; (<em>optional</em>) file can be used by designers to link to their homepage or advertise additional products and services they offer. This file is not required and will not be displayed unless the user clicks on the &quot;<strong>Additional Information</strong> &lt;/&gt;&quot; area located below allow other results. The &quot;<strong>DESIGNER.txt</strong>&quot; file name is case sensitive and may contain simple html markup.</p>
 <p>The &quot;<strong>README.txt</strong>&quot; (<em>optional</em>) file can be used by designers to display after installation instructions. This file is not required but if present, it will be displayed above all other information during install. The &quot;<strong>README.txt</strong>&quot; file name is case sensitive and may contain simple html markup.</p>
 <p>The &quot;<strong>preview.img</strong>&quot; (<em>optional</em>) file is a image or logo that can be added to display the current template. This file is not required but if present, it will be displayed on the right hand side of the template manager after the first import. The file name and acceptable image formats are &quot;<strong>preview.gif</strong>&quot;, &quot;<strong>preview.jpg</strong>&quot; and &quot;<strong>preview.png</strong>&quot; and is case sensitive.</p>
@@ -1060,8 +1292,8 @@ chmod 777 directory
 
 <h2>Plugin Credits</h2>
 
-<p>Plugin code based on a modified version of mem_templates by <a href="http://manfre.net/">Michael Manfre</a> that was released with one of <a href="http://thebombsite.com">Stuart Butcher&#8217;s</a> TXP 4.3.0 templates, which is based off of hcg_templates by <a href="http://txptag.com/">Bert Garcia</a>, which is based off of mcw_templates by <a href="http://mikewest.org/" rel="nofollow">Mike West</a> with additional features introduced to an alternate hcg_templates provided by <a href="http://clueless.com.ar/">Mariano Absatz</a>. </p>
-<p>Without the mentioned plugins and contributions from <strong>all</strong> the above this plugin would not have been made possible. </p>
+<p>Plugin code based on a modified version of mem_templates by <a href="http://manfre.net/">Michael Manfre</a> that was released with one of <a href="http://protextthemes.com">Stuart Butcher&#8217;s</a> TXP 4.3.0 templates, which is based off of hcg_templates by <a href="http://txptag.com/">Bert Garcia</a>, which is based off of mcw_templates by <a href="http://mikewest.org/" rel="nofollow">Mike West</a> with additional features introduced to an alternate hcg_templates provided by <a href="http://clueless.com.ar/">Mariano Absatz</a>. </p>
+<p>Without code contributions, help and tutoring from <a href="http://zegnat.com/">Martijn van der Ven</a>, as well as, the mentioned plugins and contributions from <strong>all</strong> the above this plugin would not have been made possible. </p>
 <p><strong>Note:</strong> <em>when </em><strong>&lt;/&gt;</strong><em> is encountered throughout the template manager it denotes information that can be expanded/collapsed to show/hide additional information.</em></p>
 
 <script type="text/javascript">

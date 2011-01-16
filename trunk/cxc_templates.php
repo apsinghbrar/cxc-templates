@@ -204,7 +204,7 @@ if (!defined('txpinterface'))
 						$tpl_dir = $prefs['path_to_site']. DIRECTORY_SEPARATOR .$template->_config['base_dir']. DIRECTORY_SEPARATOR .ps('remove_dir');
 						if (is_dir($tpl_dir)) {
 							print '<div class="cxc-tpl-current">';
-							$template->cxc_tpl_current($tpl_dir);
+							$template->cxc_tpl_preview(ps('remove_dir'), $tpl_dir);
 							print '</div>';
 						}
 					}
@@ -1039,6 +1039,37 @@ if (!defined('txpinterface'))
 					);
 				} else {
 					print '<p class="cxc-tpl-smaller">(<em><span class="cxc-tpl-capital">'.str_replace('_',' ',$prefs['cxc_tpl_current']).'</span> was the last template imported</em>)</p>';					
+				}
+			}
+		}
+
+		function cxc_tpl_preview($dir, $tpl_dir){
+			global $prefs;
+
+			$tpl_pre = $tpl_dir. DIRECTORY_SEPARATOR .'preview';
+			$tpl_alt = str_replace('_',' ',$dir).' Template Preview';
+			if (is_dir($tpl_dir)){
+
+				if ($img_size = @getimagesize($tpl_pre.'.gif')) {
+					$tpl_preview = '/'.$this->_config['base_dir'].'/'.$dir.'/preview.gif';
+				} elseif ($img_size = @getimagesize($tpl_pre.'.jpg')) {
+					$tpl_preview = '/'.$this->_config['base_dir'].'/'.$dir.'/preview.jpg';
+				} elseif ($img_size = @getimagesize($tpl_pre.'.png')) {
+					$tpl_preview = '/'.$this->_config['base_dir'].'/'.$dir.'/preview.png';
+				}
+	
+				if ($dir == '') {
+					print '
+					<h2>Top Level "<strong>'.str_replace('_',' ',$this->_config['base_dir']).'</strong>" Directory</h2>
+					<p class="cxc-tpl-smaller"><strong>Note:</strong> <em class="cxc-tpl-failure">this will remove all templates.</em></p>				
+					';
+				} else {
+					print '<h2 class="cxc-tpl-capital">'.str_replace('_',' ',$dir).' Template</h2>';
+				}
+				if (isset($tpl_preview)) {
+					print '<p class="cxc-tpl-default"><img src="'.$tpl_preview.'" width="200px" height="auto" alt="'.$tpl_alt.'" /></p>';
+				} else {
+					print '<p class="cxc-tpl-padded">No Preview Image Available</p>';
 				}
 			}
 		}

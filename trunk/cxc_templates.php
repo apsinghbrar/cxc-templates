@@ -17,7 +17,7 @@ $plugin['name'] = 'cxc_templates';
 // 1 = Plugin help is in raw HTML.  Not recommended.
 # $plugin['allow_html_help'] = 1;
 
-$plugin['version'] = '0.0.5';
+$plugin['version'] = '0.0.6';
 $plugin['author'] = '~cXc~';
 $plugin['author_uri'] = 'http://gworldz.com';
 $plugin['description'] = 'Template engine for TextPattern 4.3.0 with support for forms, pages, plugins, sections, styles and other template specific assets.';
@@ -365,7 +365,7 @@ if (!defined('txpinterface'))
 						);
 					}
 
-					if (!empty($importlist) && !$importlist == '') {
+					if (!empty($importlist) && !$importlist == '' && class_exists('ZipArchive')) {
 						print '
 							<h1>Zip Project Folder</h1>
 						'.form(
@@ -377,22 +377,24 @@ if (!defined('txpinterface'))
 						);
 					}
 
-					print '
-						<h1>Upload Template</h1>
-					'.form(
-						graf('Please select the template you would like to upload.'.' <br />'.
-							fInput('file', 'file', '', '', '', '',50,'','file').
-							eInput('cxc_templates').sInput('importZip').' <br />'.
-							checkbox('adv_live', 'adv_live', '1', '', 'adv_live').' Import Uploaded Template <br />'.
-							checkbox('import_full', 'import_full', '0', '', 'import_full').' Use Import Safe Mode (<em class="cxc-tpl-failure">non-destructive</em>) <br />
-							<span class="cxc-tpl-slide-head cxc-tpl-boxedup"><a id="upload-advanced-options">Advanced Options</a> &lt;/&gt;</span>
-							<span class="cxc-tpl-slide-body cxc-tpl-boxedup">'.
-								checkbox('adv_root', 'adv_root', '0', '', 'adv_root').' Web Root Installation (<em class="cxc-tpl-failure">not recommended</em>) <br />
-								<strong>Note:</strong> <em>do not use unless required or you know what you are doing!</em>
-							</span>'.
-							fInput('submit', 'go', 'Go', 'smallerbox','','')
-						), '', '', 'post', '', str_replace('\\', '', '\" enctype=\"multipart/form-data'), ''
-					);
+					if (class_exists('ZipArchive')) {
+						print '
+							<h1>Upload Template</h1>
+						'.form(
+							graf('Please select the template you would like to upload.'.' <br />'.
+								fInput('file', 'file', '', '', '', '',50,'','file').
+								eInput('cxc_templates').sInput('importZip').' <br />'.
+								checkbox('adv_live', 'adv_live', '1', '', 'adv_live').' Import Uploaded Template <br />'.
+								checkbox('import_full', 'import_full', '0', '', 'import_full').' Use Import Safe Mode (<em class="cxc-tpl-failure">non-destructive</em>) <br />
+								<span class="cxc-tpl-slide-head cxc-tpl-boxedup"><a id="upload-advanced-options">Advanced Options</a> &lt;/&gt;</span>
+								<span class="cxc-tpl-slide-body cxc-tpl-boxedup">'.
+									checkbox('adv_root', 'adv_root', '0', '', 'adv_root').' Web Root Installation (<em class="cxc-tpl-failure">not recommended</em>) <br />
+									<strong>Note:</strong> <em>do not use unless required or you know what you are doing!</em>
+								</span>'.
+								fInput('submit', 'go', 'Go', 'smallerbox','','')
+							), '', '', 'post', '', str_replace('\\', '', '\" enctype=\"multipart/form-data'), ''
+						);
+					}
 
 					break;
 			}

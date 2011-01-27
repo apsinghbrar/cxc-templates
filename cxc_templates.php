@@ -17,7 +17,7 @@ $plugin['name'] = 'cxc_templates';
 // 1 = Plugin help is in raw HTML.  Not recommended.
 # $plugin['allow_html_help'] = 1;
 
-$plugin['version'] = '0.0.6';
+$plugin['version'] = '0.0.6b';
 $plugin['author'] = '~cXc~';
 $plugin['author_uri'] = 'http://gworldz.com';
 $plugin['description'] = 'Template engine for TextPattern 4.3.0 with support for forms, pages, plugins, sections, styles and other template specific assets.';
@@ -56,7 +56,7 @@ if (!defined('txpinterface'))
 */
 	$cxc_templates = array(
 		'base_dir'			=>	'tpl',
-		'cache_dir'			=>	'cache',
+		'cache_dir'			=>	'tmp',
 
 		'subdir_css'		=>	'style',
 		'subdir_forms'		=>	'forms',
@@ -163,7 +163,7 @@ if (!defined('txpinterface'))
 		}
 
 		$theme_dir = $prefs['path_to_site']. DIRECTORY_SEPARATOR .$template->_config['base_dir'];
-		$cache_dir = $prefs['path_to_site']. DIRECTORY_SEPARATOR .$template->_config['cache_dir'];
+		$cache_dir = $prefs['path_to_site']. DIRECTORY_SEPARATOR .'textpattern'. DIRECTORY_SEPARATOR .$template->_config['cache_dir'];
 		if (is_dir($theme_dir) && is_dir($cache_dir)) {
 
 			$theme_index = $theme_dir. DIRECTORY_SEPARATOR .'index.html';
@@ -261,7 +261,7 @@ if (!defined('txpinterface'))
 					$adv_root = ps('adv_root');
 					$import_full = ps('import_full');
 					$tpl_alist = scandir($theme_dir);
-					$rel_temp_dir = '..'. DIRECTORY_SEPARATOR .$template->_config['cache_dir']. DIRECTORY_SEPARATOR . $_FILES['file']['name'];															
+					$rel_temp_dir = $template->_config['cache_dir']. DIRECTORY_SEPARATOR . $_FILES['file']['name'];															
 					move_uploaded_file($_FILES['file']['tmp_name'],$rel_temp_dir);
 					$template->importZip($adv_live, $adv_root, $rel_temp_dir,$_FILES['file']['name']);
 					$tpl_blist = scandir($theme_dir);
@@ -377,9 +377,11 @@ if (!defined('txpinterface'))
 						);
 					}
 
+					print '
+						<h1>Upload Template</h1>
+					';
 					if (class_exists('ZipArchive')) {
 						print '
-							<h1>Upload Template</h1>
 						'.form(
 							graf('Please select the template you would like to upload.'.' <br />'.
 								fInput('file', 'file', '', '', '', '',50,'','file').
@@ -394,6 +396,11 @@ if (!defined('txpinterface'))
 								fInput('submit', 'go', 'Go', 'smallerbox','','')
 							), '', '', 'post', '', str_replace('\\', '', '\" enctype=\"multipart/form-data'), ''
 						);
+					} else {
+						print '
+						<span class="cxc-tpl-slide-head cxc-tpl-boxedup"><a id="upload-advanced-options">Feature Unavailable</a> &lt;/&gt;</span>
+						<span class="cxc-tpl-slide-body cxc-tpl-boxedup">Full explanation of why the Zip features are not availavle and how it can be resolved. This will explain that the ZipArchive class is required and tell the user how to enable it in the php.ini file or if the php.ini file is unavaible on their host, recommend contacting the host to enable the extension.</span>
+						';
 					}
 
 					break;
@@ -413,29 +420,35 @@ if (!defined('txpinterface'))
 				if (!is_dir($theme_dir) && !is_dir($cache_dir)) {
 					print '
 						<h1 class="cxc-tpl-failure">Required Directories Missing</h1>
-						<p>This plugin requires the \'<strong>'.$template->_config['cache_dir'].'</strong>\' and \'<strong>'.$template->_config['base_dir'].'</strong>\' directories to be located in the webroot for it to function properly, either `<strong>'.$cache_dir.'</strong>\' or \'<strong>'.$theme_dir.'</strong>\' does not exist, and could not be automatically created. You could also adjust the plugin\'s directory by modifying <code>\$cxc_templates[\'base_dir\']</code> and/or <code>\$cxc_templates[\'cache_dir\']</code> in the plugin\'s code.</p>
+						<p>This plugin requires the `<strong>'.$template->_config['base_dir'].'</strong>` directory to be located in the webroot for it to function properly and the `<strong>'.$template->_config['cache_dir'].'</strong>` directory to be in the textpattern directory, either `<strong>'.$theme_dir.'</strong>` or `<strong>'.$cache_dir.'</strong>` does not exist, and could not be automatically created.</p>
 						<p>Please create these directories manually using your FTP client, hosting control panel or by running something like  ...</p>
-						<pre><code>    mkdir '.$cache_dir.'\n    chmod 777 '.$cache_dir.'</code></pre>
-						<p>... and / or ...</p> 
-						<pre><code>    mkdir '.$theme_dir.'\n    chmod 777 '.$theme_dir.'</code></pre>
-						<p>After you have created the missing directories, return to (or reload) this page to display the template manager.</p>
-						<p>For additional security you may also want to include empty index.html files or adjust your .htaccess for these directories.</p>
+<pre><code>    mkdir '.$template->_config['base_dir'].'
+    chmod 777 '.$template->_config['base_dir'].'
+</code></pre>
+						<p>After you have created the missing directories, return to (or reload) this page to display the template manager. You could also adjust the plugin\'s directory by modifying <code>$cxc_templates[\'base_dir\']</code> and/or <code>$cxc_templates[\'cache_dir\']</code> in the plugin\'s code.</p>
+						<p>For additional security you may also want to include empty index.html files or adjust your .htaccess for these `<strong>'.$theme_dir.'</strong>` directories.</p>
 						<h2><a href="index.php?event=cxc_templates">&#8617; Click here to return to the template manager.</a></h2>
 					';
 				} else {
 					if (!is_dir($theme_dir)){
 						$missing_dir = $template->_config['base_dir'];
+						$missing_loc = '';
 						$is_missing_dir = 'base_dir';
+						$is_missing_loc = 'webroot';
 					}else{
 						$missing_dir = $template->_config['cache_dir'];
+						$missing_loc = DIRECTORY_SEPARATOR .'textpattern'. DIRECTORY_SEPARATOR;
 						$is_missing_dir = 'cache_dir';
+						$is_missing_loc = 'textpattern';
 					}
 					print '
 						<h1 class="cxc-tpl-failure">Required Directories Missing</h1>
-						<p>This plugin requires the \'<strong>'.$missing_dir.'</strong>\' directory to be located in the webroot for it to function properly, \'<strong>'.$missing_dir.'</strong>\' does not exist, and could not be automatically created. You could also adjust the plugin\'s directory by modifying <code>\$cxc_templates[\''.$is_missing_dir.'\']</code> in the plugin\'s code.</p>
+						<p>This plugin requires the `<strong>'.$missing_dir.'</strong>` directory to be located in the `<strong>'.$is_missing_loc.'</strong>` directory for it to function properly, the `<strong>'.$missing_dir.'</strong>` directory does not exist, and could not be automatically created.</p>
 						<p>Please create the directory manually using your FTP client, hosting control panel or by running something like  ...</p>
-						<pre><code>    mkdir '.$missing_dir.'\n    chmod 777 '.$missing_dir.'</code></pre>
-						<p>After you have created the missing directory, return to (or reload) this page to display the template manager.</p>
+<pre><code>    mkdir '.$missing_loc.$missing_dir.'
+    chmod 777 '.$missing_loc.$missing_dir.'
+</code></pre>
+						<p>After you have created the missing directory, return to (or reload) this page to display the template manager. You could also adjust the plugin\'s directory by modifying <code>$cxc_templates[\''.$is_missing_dir.'\']</code> in the plugin\'s code.</p>
 						<p>For additional security you may also want to include empty index.html files or adjust your .htaccess for the directory.</p>
 						<h2><a href="index.php?event=cxc_templates">&#8617; Click here to return to the template manager.</a></h2>
 					';

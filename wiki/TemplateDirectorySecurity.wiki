@@ -1,7 +1,7 @@
 <h1>Protecting Templates With .htaccess</h1>
 <p>The templates directory of professional template designers are given the simplest of protections by the plugin writing index.html files to all template directories but if someone can guess the file names it is still possible to rip your designs. Below are a few options to help add additional security to the templates directory. All use the .htaccess file and they should be placed after the standard txp .htaccess content.</p>
 
-<pre>##################################################
+{{{##################################################
 # SETTING UP MOD REWRITE ENGINE REDIRECTION
 ##################################################
 # This option uses mod_rewrite to redirect to the 
@@ -67,6 +67,5 @@
 #</FilesMatch>
 ##################################################
 # STOP THIS IS THE END OF THE AUTHENTICATION BLOCK
-##################################################
-</pre>
+##################################################}}}
 <p>Do not use George as your username and Sandy as you password, that is just an example!</p>

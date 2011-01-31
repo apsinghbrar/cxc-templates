@@ -17,7 +17,7 @@ $plugin['name'] = 'cxc_templates';
 // 1 = Plugin help is in raw HTML.  Not recommended.
 # $plugin['allow_html_help'] = 1;
 
-$plugin['version'] = '0.0.7';
+$plugin['version'] = '0.0.8';
 $plugin['author'] = '~cXc~';
 $plugin['author_uri'] = 'http://gworldz.com';
 $plugin['description'] = 'Template engine for TextPattern 4.3.0 with support for forms, pages, plugins, sections, styles and other template specific assets.';
@@ -827,9 +827,38 @@ if (!defined('txpinterface'))
 				Auto export into `preimport-data`
 			*/
 			print '
-				<h1>Template Processing</h1>
-				<p>Your current template data will be available for re-import as `preimport-data` for future use</p>
-				<p><strong>Note:</strong> <em>installing another template will overwrite the current `preimport-data` so rename the directory to something else after it is exported to preserve a more permanent backup.</em></p>
+				<h1 class="cxc-tpl-slide-head"><a id="processing-backup" title="Click here to open/close detailed list of backup events.">Template Processing</a> &lt;/&gt;</h1>
+				<div class="cxc-tpl-slide-body">
+				<blockquote>
+			';
+			$pre_dir = $this->_config['full_base_path']. DIRECTORY_SEPARATOR .'preimport-data';
+			if (is_dir($pre_dir)) {
+				$objects = scandir($pre_dir);
+				foreach ($objects as $object) {
+					if ($object != '.' && $object != '..') {
+						if (is_dir($pre_dir. DIRECTORY_SEPARATOR .$object)) {
+							$this->removeDirectory($pre_dir. DIRECTORY_SEPARATOR .$object);
+						} else { 
+							@unlink($pre_dir. DIRECTORY_SEPARATOR .$object);
+						}
+					}
+				}
+				reset($objects);
+				@rmdir($pre_dir);
+			}
+			if (!is_dir($pre_dir)){					
+				print '
+					<p>The `<strong>preimport-data</strong>` template directory has been successfully removed from the `<strong>'.$this->_config['base_dir'].'</strong>` directory so a new backup can be written to replace previous template backups.</p>
+				';
+			} else {
+				print '
+					<p>The `<strong>preimport-data</strong>` template directory was not removed, the backup may contain additional files from previous backups. Your current template data will be added to `<strong>preimport-data</strong>` for future use.</p>
+				';
+			}
+			print '
+				<p><strong>Note:</strong> <em>installing another template will overwrite the current `<strong>preimport-data</strong>` so rename the directory to something else after it is exported to preserve a more permanent backup.</em></p>
+				</blockquote>
+				</div>
 			';
 
 			$this->export('preimport-data');
@@ -2042,7 +2071,7 @@ chmod 777 directory
 <h2>Plugin Credits</h2>
 
 <p>Plugin code based on a modified version of mem_templates by <a href="http://manfre.net/">Michael Manfre</a> that was released with one of <a href="http://protextthemes.com">Stuart Butcher&#8217;s</a> TXP 4.3.0 templates, which is based off of hcg_templates by <a href="http://txptag.com/">Bert Garcia</a>, which is based off of mcw_templates by <a href="http://mikewest.org/" rel="nofollow">Mike West</a> with additional features introduced to an alternate hcg_templates provided by <a href="http://clueless.com.ar/">Mariano Absatz</a>. </p>
-<p>Without code contributions, help and tutoring from <a href="http://zegnat.com/">Martijn van der Ven</a>, as well as, the mentioned plugins and contributions from <strong>all</strong> the above this plugin would not have been made possible. </p>
+<p>Without code contributions, help and tutoring from <a href="http://zegnat.com/">Martijn van der Ven</a> and <a href="http://stefdawson.com/">Stef Dawson</a>, as well as, the mentioned plugins and contributions from <strong>all</strong> the above this plugin would not have been made possible. </p>
 <p><strong>Note:</strong> <em>when </em><strong>&lt;/&gt;</strong><em> is encountered throughout the template manager it denotes information that can be expanded/collapsed to show/hide additional information.</em></p>
 
 <script type="text/javascript">

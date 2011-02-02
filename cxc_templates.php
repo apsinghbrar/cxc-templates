@@ -1108,7 +1108,7 @@ if (!defined('txpinterface'))
 					<p class="cxc-tpl-smaller">'.cxc_templates_gTxt('cxc_tpl_top_remove').'</p>				
 					';
 				} else {
-					print '<h2 class="cxc-tpl-capital">'.str_replace('_',' ',$dir).' '.cxc_templates_gTxt('cxc_tpl_top_template').'</h2>';
+					print '<h2 class="cxc-tpl-capital">'.str_replace('_',' ',$dir).' '.cxc_templates_gTxt('cxc_tpl_template').'</h2>';
 				}
 				if (isset($tpl_preview)) {
 					print '<p class="cxc-tpl-default"><img src="'.$tpl_preview.'" width="200px" height="auto" alt="'.$tpl_alt.'" /></p>';
@@ -1968,9 +1968,9 @@ if (!defined('txpinterface'))
 			'cxc_tpl_remove_before' => 'This will completely remove the "<strong>',
 			'cxc_tpl_remove_after' => '</strong>" directory from your site, click "<strong>GO</strong>" to continue or use the link below to return to the template manager.',
 			'cxc_tpl_removed' => 'Template Removed',
-			'cxc_tpl_the_capital' => 'The <span class="cxc-tpl-capital">',
-			'cxc_tpl_removed_from' => '</span> template directory has been removed from the "',
-			'cxc_tpl_removed_dir' => '" directory.',
+			'cxc_tpl_the_capital' => 'The <span class="cxc-tpl-capital"><strong>',
+			'cxc_tpl_removed_from' => '</strong></span> template files have been successfully removed from the "<strong>',
+			'cxc_tpl_removed_dir' => '</strong>" directory.',
 			'cxc_tpl_remove_failed' => 'Unable to Remove Template',
 			'cxc_tpl_not_removed' => '</span> template directory was not removed, this might be due to the server configuration of your host and removal of templates may need to be done manually',
 			'cxc_tpl_template_import' => 'Template Import:',

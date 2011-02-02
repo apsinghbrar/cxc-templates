@@ -1,5 +1,4 @@
 <?php
-
 // This is a PLUGIN TEMPLATE.
 
 // Copy this file to a new name like abc_myplugin.php.  Edit the code, then

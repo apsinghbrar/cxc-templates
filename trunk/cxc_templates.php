@@ -17,9 +17,9 @@ $plugin['name'] = 'cxc_templates';
 // 1 = Plugin help is in raw HTML.  Not recommended.
 # $plugin['allow_html_help'] = 1;
 
-$plugin['version'] = '0.0.8';
+$plugin['version'] = '0.0.9';
 $plugin['author'] = '~cXc~';
-$plugin['author_uri'] = 'http://gworldz.com';
+$plugin['author_uri'] = 'http://code.google.com/p/cxc-templates/';
 $plugin['description'] = 'Template engine for TextPattern 4.3.0 with support for forms, pages, plugins, sections, styles and other template specific assets.';
 
 // Plugin load order:
@@ -85,7 +85,7 @@ if (!defined('txpinterface'))
 */	
 	if (@txpinterface == 'admin') {
 		$import = 'cxc_templates';
-		$import_tab = 'Templates';
+		$import_tab = cxc_templates_gTxt('cxc_tpl_templates_tab');
 
 		add_privs($import, '1,2');
 		register_tab('extensions', $import, $import_tab);
@@ -122,7 +122,7 @@ if (!defined('txpinterface'))
 		global $prefs;
 		$template = new cxc_template();
 
-		pagetop('Process Templates', '');
+		pagetop(cxc_templates_gTxt('cxc_tpl_process'), '');
 		print '
 		<style type="text/css">
 			.cxc-tpl-boxedup { display: block; width: 450px; }
@@ -154,9 +154,9 @@ if (!defined('txpinterface'))
 
 		if (!isset($prefs['cxc_tpl_current']) && !set_pref('cxc_tpl_current', '', 'publish', 2) && !get_pref('cxc_tpl_current')) {
 			print '
-				<h1 class="cxc-tpl-failure">Plugin Preferences</h1>
+				<h1 class="cxc-tpl-failure">'.cxc_templates_gTxt('cxc_tpl_preferences').'</h1>
 				<ul class="results">
-					<li><span class="cxc-tpl-failure">Database update failed</span> entry for current template will be unavailable.</li>
+					<li>'.cxc_templates_gTxt('cxc_tpl_dbupdate').'</li>
 				</ul>
 				<br />
 			';
@@ -179,7 +179,7 @@ if (!defined('txpinterface'))
 					$template->import($import_full, ps('import_dir'));
 					$template->writeIndexFiles($theme_dir. DIRECTORY_SEPARATOR .ps('import_dir'));
 					print '
-						<h2><a href="index.php?event=cxc_templates">&#8617; Click here to return to the template manager.</a></h2>
+						<h2><a href="index.php?event=cxc_templates">&#8617; '.cxc_templates_gTxt('cxc_tpl_return').'</a></h2>
 					';
 					break;
 
@@ -194,7 +194,7 @@ if (!defined('txpinterface'))
 					$template->export($dir);
 					$template->writeIndexFiles($theme_dir. DIRECTORY_SEPARATOR .ps('export_dir'));
 					print '
-						<h2><a href="index.php?event=cxc_templates">&#8617; Click here to return to the template manager.</a></h2>
+						<h2><a href="index.php?event=cxc_templates">&#8617; '.cxc_templates_gTxt('cxc_tpl_return').'</a></h2>
 					';
 					break;
 
@@ -210,8 +210,8 @@ if (!defined('txpinterface'))
 					}
 
 					print '
-						<h1 class="cxc-tpl-failure">Delete Directory Confirmation</h1>
-						<p>This will completely remove the "<strong>'.$dir.'</strong>" directory from your site, click "<strong>GO</strong>" to continue or use the link below to return to the template manager.</p>
+						<h1 class="cxc-tpl-failure">'.cxc_templates_gTxt('cxc_tpl_delete_confirm').'</h1>
+						<p>'.cxc_templates_gTxt('cxc_tpl_remove_before').$dir.cxc_templates_gTxt('cxc_tpl_remove_after').'</p>
 						'.form(
 							graf(''.
 								hInput('remove_dir',ps('remove_dir')).' '.
@@ -219,7 +219,7 @@ if (!defined('txpinterface'))
 								eInput('cxc_templates').sInput('remove')
 							)
 						).'
-						<h2><a href="index.php?event=cxc_templates">&#8617; Click here to return to the template manager.</a></h2>
+						<h2><a href="index.php?event=cxc_templates">&#8617; '.cxc_templates_gTxt('cxc_tpl_return').'</a></h2>
 						';
 
 					break;
@@ -242,17 +242,17 @@ if (!defined('txpinterface'))
 					}
 					if (!is_dir($dir)){					
 						print '
-							<h1 class="cxc-tpl-success"><span class="cxc-tpl-capital">'.str_replace('_', ' ', ps('remove_dir')).'</span> Template Removed</h1>
-							<p>The <span class="cxc-tpl-capital">'.str_replace('_', ' ', ps('remove_dir')).'</span> template directory has been removed from the "'.$template->_config['base_dir'].'" directory.</p>
+							<h1 class="cxc-tpl-success"><span class="cxc-tpl-capital">'.str_replace('_', ' ', ps('remove_dir')).'</span> '.cxc_templates_gTxt('cxc_tpl_removed').'</h1>
+							<p>'.cxc_templates_gTxt('cxc_tpl_the_capital').str_replace('_', ' ', ps('remove_dir')).cxc_templates_gTxt('cxc_tpl_removed_from').$template->_config['base_dir'].cxc_templates_gTxt('cxc_tpl_removed_dir').'</p>
 						';
 					} else {
 						print '
-							<h1 class="cxc-tpl-failure">Unable to Remove Template</h1>
-							<p>The <span class="cxc-tpl-capital">'.str_replace('_', ' ', ps('remove_dir')).'</span> template directory was not removed, this might be due to the server configuration of your host and removal of templates may need to be done manually</p>
+							<h1 class="cxc-tpl-failure">'.cxc_templates_gTxt('cxc_tpl_remove_failed').'</h1>
+							<p>'.cxc_templates_gTxt('cxc_tpl_the_capital').str_replace('_', ' ', ps('remove_dir')).cxc_templates_gTxt('cxc_tpl_not_removed').'</p>
 						';
 					}
 					print '
-						<h2><a href="index.php?event=cxc_templates">&#8617; Click here to return to the template manager.</a></h2>
+						<h2><a href="index.php?event=cxc_templates">&#8617; '.cxc_templates_gTxt('cxc_tpl_return').'</a></h2>
 					';
 					break;
 
@@ -272,24 +272,24 @@ if (!defined('txpinterface'))
 							$template->writeIndexFiles($theme_dir. DIRECTORY_SEPARATOR .$newtpl[0]);
 						} else {
 							print '
-								<h1>Template Import: <span class="cxc-tpl-capital">'.str_replace('_', ' ', str_replace('.zip', '', $_FILES['file']['name'])).'</span></h1>
+								<h1>'.cxc_templates_gTxt('cxc_tpl_template_import').' <span class="cxc-tpl-capital">'.str_replace('_', ' ', str_replace('.zip', '', $_FILES['file']['name'])).'</span></h1>
 								<ul class="results">
-									<li><span class="cxc-tpl-failure">Failed importing</span> the \'<span class="cxc-tpl-capital">'.str_replace(' ', '-', str_replace('.zip', '', $_FILES['file']['name'])).'</span>\' template files</li>
+									<li>'.cxc_templates_gTxt('cxc_tpl_import_failed_before').str_replace(' ', '-', str_replace('.zip', '', $_FILES['file']['name'])).cxc_templates_gTxt('cxc_tpl_import_failed_after').'</li>
 								</ul>
 								<br />
-								<p>It was not possible to import the uploaded template because the Zip file contained more than one template or it was already present in the templates directory.</p>
+								<p>'.cxc_templates_gTxt('cxc_tpl_upload_import_fail').'</p>
 							';
 						}
 					}
 					print '
-						<h2><a href="index.php?event=cxc_templates">&#8617; Click here to return to the template manager.</a></h2>
+						<h2><a href="index.php?event=cxc_templates">&#8617; '.cxc_templates_gTxt('cxc_tpl_return').'</a></h2>
 					';
 					break;
 
 				case 'docs':
 					$template->cxc_tpl_docs($prefs['cxc_tpl_current']);
 					print '
-						<h2><a href="index.php?event=cxc_templates">&#8617; Click here to return to the template manager.</a></h2>
+						<h2><a href="index.php?event=cxc_templates">&#8617; '.cxc_templates_gTxt('cxc_tpl_return').'</a></h2>
 					';
 					break;
 
@@ -299,7 +299,7 @@ if (!defined('txpinterface'))
 					$template->writeIndexFiles($theme_dir. DIRECTORY_SEPARATOR .$zipdir);
 					$template->cxc_tpl_downzip($theme_dir. DIRECTORY_SEPARATOR .$zipdir, $zipdir.'.zip', $stripz);
 					print '
-						<h2><a href="index.php?event=cxc_templates">&#8617; Click here to return to the template manager.</a></h2>
+						<h2><a href="index.php?event=cxc_templates">&#8617; '.cxc_templates_gTxt('cxc_tpl_return').'</a></h2>
 					';
 					break;
 
@@ -318,26 +318,26 @@ if (!defined('txpinterface'))
 
 					if (empty($importlist) || $importlist == '') {
 						print '
-							<h1>Import Template</h1>
-							<p class="cxc-tpl-boxedup">There are no templates installed in the \'<strong>'.$template->_config['base_dir'].'</strong>\' directory, please clone your current template or upload a new one.</p>
+							<h1>'.cxc_templates_gTxt('cxc_tpl_import_template').'</h1>
+							<p class="cxc-tpl-boxedup">'.cxc_templates_gTxt('cxc_tpl_none_before').$template->_config['base_dir'].cxc_templates_gTxt('cxc_tpl_none_after').'</p>
 							<span class="cxc-tpl-slide-head">
 								'.form(
 									graf(''.
-										checkbox('show_alt', 'show_alt', '0', '', 'show_alt').' Use Alternate Template Directory (<em class="cxc-tpl-failure">not recommended</em>) &lt;/&gt;')
+										checkbox('show_alt', 'show_alt', '0', '', 'show_alt').' '.cxc_templates_gTxt('cxc_tpl_alternate_dir').' &lt;/&gt;')
 								).'
 							</span>
 							<div class="cxc-tpl-slide-body">
-								<p class="cxc-tpl-boxedup">You will need to adjust the location to be used as the template directory by modifying <code>\$cxc_templates[\'base_dir\']</code> in the plugin\'s code. After you have adjusted the plugin\'s code it will try to automatically create the chosen directory for you if not already present in your webroot.</p>
-								<p class="cxc-tpl-boxedup"><strong>Note:</strong> this could affect template assets and result in broken links to css, images, JS and other template files so it is recommended you use the default or select the directory used by the templates designer.</p>
+								<p class="cxc-tpl-boxedup">'.cxc_templates_gTxt('cxc_tpl_alt_adjust').'</p>
+								<p class="cxc-tpl-boxedup">'.cxc_templates_gTxt('cxc_tpl_alt_note').'</p>
 							</div>
 						';
 					} else {
 						print '
-							<h1>Import Template</h1>
+							<h1>'.cxc_templates_gTxt('cxc_tpl_import_template').'</h1>
 						'.form(
-							graf('Which template would you like to import?'.' <br />'.
+							graf(''.cxc_templates_gTxt('cxc_tpl_import_which').' <br />'.
 								selectInput('import_dir', $importlist, '', 1).' <br />'.
-								checkbox('import_full', 'import_full', '0', '', 'import_full').' Use Import Safe Mode (<em class="cxc-tpl-failure">non-destructive</em>) <br />'.
+								checkbox('import_full', 'import_full', '0', '', 'import_full').' '.cxc_templates_gTxt('cxc_tpl_import_safe_mode').' <br />'.
 								fInput('submit', 'go', 'Go', 'smallerbox').
 								eInput('cxc_templates').sInput('import')
 							)
@@ -345,9 +345,9 @@ if (!defined('txpinterface'))
 					}
 
 					print '
-						<h1>Export Template</h1>	
+						<h1>'.cxc_templates_gTxt('cxc_tpl_export_template').'</h1>	
 					'.form(
-						graf('Choose a name for the exported template.'.' <br />'.
+						graf(''.cxc_templates_gTxt('cxc_tpl_export_name').' <br />'.
 							fInput('text', 'export_dir', '').
 							fInput('submit', 'go', 'Go', 'smallerbox').
 							eInput('cxc_templates').sInput('export')
@@ -356,7 +356,7 @@ if (!defined('txpinterface'))
 
 					if (!empty($importlist) && !$importlist == '') {
 						print '
-							<h1>Delete Template</h1>
+							<h1>'.cxc_templates_gTxt('cxc_tpl_delete_template').'</h1>
 						'.form(
 							graf(''.
 								selectInput('remove_dir', $importlist, '', 1).' '.
@@ -368,7 +368,7 @@ if (!defined('txpinterface'))
 
 					if (!empty($importlist) && !$importlist == '' && in_array('zlib', $php_modules)) {
 						print '
-							<h1>Zip Project Folder</h1>
+							<h1>'.cxc_templates_gTxt('cxc_tpl_zip_template').'</h1>
 						'.form(
 							graf(''.
 								selectInput('zip_dir', $importlist, '', 1).' '.
@@ -379,28 +379,28 @@ if (!defined('txpinterface'))
 					}
 
 					print '
-						<h1>Upload Template</h1>
+						<h1>'.cxc_templates_gTxt('cxc_tpl_upload_template').'</h1>
 					';
 					if (in_array('zlib', $php_modules)) {
 						print '
 						'.form(
-							graf('Please select the template you would like to upload.'.' <br />'.
+							graf(''.cxc_templates_gTxt('cxc_tpl_upload_select').' <br />'.
 								fInput('file', 'file', '', '', '', '',50,'','file').
 								eInput('cxc_templates').sInput('importZip').' <br />'.
-								checkbox('adv_live', 'adv_live', '1', '', 'adv_live').' Import Uploaded Template <br />'.
-								checkbox('import_full', 'import_full', '0', '', 'import_full').' Use Import Safe Mode (<em class="cxc-tpl-failure">non-destructive</em>) <br />
-								<span class="cxc-tpl-slide-head cxc-tpl-boxedup"><a id="upload-advanced-options">Advanced Options</a> &lt;/&gt;</span>
+								checkbox('adv_live', 'adv_live', '1', '', 'adv_live').' '.cxc_templates_gTxt('cxc_tpl_upload_import').' <br />'.
+								checkbox('import_full', 'import_full', '0', '', 'import_full').' '.cxc_templates_gTxt('cxc_tpl_import_safe_mode').' <br />
+								<span class="cxc-tpl-slide-head cxc-tpl-boxedup"><a id="upload-advanced-options">'.cxc_templates_gTxt('cxc_tpl_advanced_options').'</a> &lt;/&gt;</span>
 								<span class="cxc-tpl-slide-body cxc-tpl-boxedup">'.
-									checkbox('adv_root', 'adv_root', '0', '', 'adv_root').' Web Root Installation (<em class="cxc-tpl-failure">not recommended</em>) <br />
-									<strong>Note:</strong> <em>do not use unless required or you know what you are doing!</em>
+									checkbox('adv_root', 'adv_root', '0', '', 'adv_root').' '.cxc_templates_gTxt('cxc_tpl_root_install').' <br />
+									<strong>'.cxc_templates_gTxt('cxc_tpl_advanced_note').'</em>
 								</span>'.
 								fInput('submit', 'go', 'Go', 'smallerbox','','')
 							), '', '', 'post', '', str_replace('\\', '', '\" enctype=\"multipart/form-data'), ''
 						);
 					} else {
 						print '
-						<span class="cxc-tpl-slide-head cxc-tpl-boxedup"><a id="upload-advanced-options">Feature Unavailable</a> &lt;/&gt;</span>
-						<span class="cxc-tpl-slide-body cxc-tpl-boxedup">If you are seeing this error it means your host compiled version of PHP does not include the ZLib modules. This feature requires the extension ZLib to be enabled, it is compiled by default for most site hosts around the world, and for the PHP Win32 distributions. If this is unavailable you should try speaking to your hosts to have it enabled, if they are not able to provide this for you, I recommend considering a new host. If you choose to remain with them you will have to unzip locally and FTP templates into your template directory, sorry for the inconvenience.</span>
+						<span class="cxc-tpl-slide-head cxc-tpl-boxedup"><a id="upload-advanced-options">'.cxc_templates_gTxt('cxc_tpl_feature_unavailable').'</a> &lt;/&gt;</span>
+						<span class="cxc-tpl-slide-body cxc-tpl-boxedup">'.cxc_templates_gTxt('cxc_tpl_zlib_enabled_text').'</span>
 						';
 					}
 
@@ -414,28 +414,28 @@ if (!defined('txpinterface'))
 			if (is_dir($cache_dir) && !is_writable($cache_dir) && !chmod($cache_dir, 0777)) { $error = true; }
 			if (!$error) { // no errors, let’s do your thing
 				print '
-					<h1 class="cxc-tpl-failure">Required Directories Created</h1>
-					<p><a href="index.php?event=cxc_templates">Click here to reload this page</a> and display the template manager.</p>
+					<h1 class="cxc-tpl-failure">'.cxc_templates_gTxt('cxc_tpl_req_dir_created').'</h1>
+					<p><a href="index.php?event=cxc_templates">'.cxc_templates_gTxt('cxc_tpl_reload_click').'</a> '.cxc_templates_gTxt('cxc_tpl_reload_display').'</p>
 				';
 			} else {
 				if (!is_dir($theme_dir) && !is_dir($cache_dir)) {
 					print '
-						<h1 class="cxc-tpl-failure">Required Directories Missing</h1>
-						<p>This plugin requires the `<strong>'.$template->_config['base_dir'].'</strong>` directory to be located in the webroot for it to function properly and the `<strong>'.$template->_config['cache_dir'].'</strong>` directory to be in the textpattern directory, either `<strong>'.$theme_dir.'</strong>` or `<strong>'.$cache_dir.'</strong>` does not exist, and could not be automatically created.</p>
-						<p>Please create these directories manually using your FTP client, hosting control panel or by running something like  ...</p>
+						<h1 class="cxc-tpl-failure">'.cxc_templates_gTxt('cxc_tpl_req_dir_missing').'</h1>
+						<p>'.cxc_templates_gTxt('cxc_tpl_req_dir_this').$template->_config['base_dir'].cxc_templates_gTxt('cxc_tpl_req_dir_theme').$template->_config['cache_dir'].cxc_templates_gTxt('cxc_tpl_req_dir_cache').$theme_dir.cxc_templates_gTxt('cxc_tpl_req_dir_or').$cache_dir.cxc_templates_gTxt('cxc_tpl_req_dir_auto').'</p>
+						<p>'.cxc_templates_gTxt('cxc_tpl_req_dir_manual').'</p>
 <pre><code>    mkdir '.$template->_config['base_dir'].'
     chmod 777 '.$template->_config['base_dir'].'
 </code></pre>
-						<p>After you have created the missing directories, return to (or reload) this page to display the template manager. You could also adjust the plugin\'s directory by modifying <code>$cxc_templates[\'base_dir\']</code> and/or <code>$cxc_templates[\'cache_dir\']</code> in the plugin\'s code.</p>
-						<p>For additional security you may also want to include empty index.html files or adjust your .htaccess for these `<strong>'.$theme_dir.'</strong>` directories.</p>
-						<h2><a href="index.php?event=cxc_templates">&#8617; Click here to return to the template manager.</a></h2>
+						<p>'.cxc_templates_gTxt('cxc_tpl_req_dir_after').'</p>
+						<p>'.cxc_templates_gTxt('cxc_tpl_add_security').$theme_dir.cxc_templates_gTxt('cxc_tpl_add_empty_dir').'</p>
+						<h2><a href="index.php?event=cxc_templates">&#8617; '.cxc_templates_gTxt('cxc_tpl_return').'</a></h2>
 					';
 				} else {
 					if (!is_dir($theme_dir)){
 						$missing_dir = $template->_config['base_dir'];
 						$missing_loc = '';
 						$is_missing_dir = 'base_dir';
-						$is_missing_loc = 'webroot';
+						$is_missing_loc = cxc_templates_gTxt('cxc_tpl_webroot ');
 					}else{
 						$missing_dir = $template->_config['cache_dir'];
 						$missing_loc = DIRECTORY_SEPARATOR .'textpattern'. DIRECTORY_SEPARATOR;
@@ -443,15 +443,15 @@ if (!defined('txpinterface'))
 						$is_missing_loc = 'textpattern';
 					}
 					print '
-						<h1 class="cxc-tpl-failure">Required Directories Missing</h1>
-						<p>This plugin requires the `<strong>'.$missing_dir.'</strong>` directory to be located in the `<strong>'.$is_missing_loc.'</strong>` directory for it to function properly, the `<strong>'.$missing_dir.'</strong>` directory does not exist, and could not be automatically created.</p>
-						<p>Please create the directory manually using your FTP client, hosting control panel or by running something like  ...</p>
+						<h1 class="cxc-tpl-failure">'.cxc_templates_gTxt('cxc_tpl_req_dir_missing').'</h1>
+						<p>'.cxc_templates_gTxt('cxc_tpl_req_dir_this').$missing_dir.cxc_templates_gTxt('cxc_tpl_req_directory').$is_missing_loc.cxc_templates_gTxt('cxc_tpl_req_properly').$missing_dir.cxc_templates_gTxt('cxc_tpl_req_dir_auto').'</p>
+						<p>'.cxc_templates_gTxt('cxc_tpl_req_manual').'</p>
 <pre><code>    mkdir '.$missing_loc.$missing_dir.'
     chmod 777 '.$missing_loc.$missing_dir.'
 </code></pre>
-						<p>After you have created the missing directory, return to (or reload) this page to display the template manager. You could also adjust the plugin\'s directory by modifying <code>$cxc_templates[\''.$is_missing_dir.'\']</code> in the plugin\'s code.</p>
-						<p>For additional security you may also want to include empty index.html files or adjust your .htaccess for the directory.</p>
-						<h2><a href="index.php?event=cxc_templates">&#8617; Click here to return to the template manager.</a></h2>
+						<p>'.cxc_templates_gTxt('cxc_tpl_req_after').$is_missing_dir.cxc_templates_gTxt('cxc_tpl_req_code').'</p>
+						<p>'.cxc_templates_gTxt('cxc_tpl_secure_dir').'</p>
+						<h2><a href="index.php?event=cxc_templates">&#8617; '.cxc_templates_gTxt('cxc_tpl_return').'</a></h2>
 					';
 				}
 			}
@@ -487,14 +487,14 @@ if (!defined('txpinterface'))
 				<p>%s</p>
 			';
 
-			$missing_dir_head   = 'Template Directory Missing';
-			$missing_dir_text   = 'The template directory `<strong>%1\$s</strong>` does not exist, and could not be automatically created. Would you mind creating it yourself by running something like</p><pre><code>    mkdir %1\$s\n    chmod 777 %1\$s</code></pre><p>That should fix the issue. You could also adjust the plugin\'s directory by modifying <code>\$cxc_templates[\'base_dir\']</code> in the plugin\'s code.';
-			$cant_write_head    = 'Template Directory Not Writable';
-			$cant_write_text    = 'I can\'t seem to write to the template directory \'<strong>%1\$s</strong>\'.  Would you mind running something like</p><pre><code>    chmod 777 %1\$s</code></pre><p>to fix the problem?';
-			$cant_read_head     = 'Template Directory Not Readable';
-			$cant_read_text     = 'I can\'t seem to read from the template directory \'<strong>%1\$s</strong>\'.  Would you mind running something like</p><pre><code>    chmod 777 %%1\$s</code></pre><p>to fix the problem?';
-			$wrong_file_head	= 'Unsupported File Type';
-			$wrong_file_text	= 'The file is either corrupt or is an unsupported file type, only zip files are currently supported by this plugin.';
+			$missing_dir_head   = cxc_templates_gTxt('cxc_tpl_req_dir_missing');
+			$missing_dir_text   = cxc_templates_gTxt('cxc_tpl_template_dir').'%1\$s'.cxc_templates_gTxt('cxc_tpl_req_dir_auto').' '.cxc_templates_gTxt('cxc_tpl_would_you').'</p><pre><code>    mkdir %1\$s\n    chmod 777 %1\$s</code></pre><p>'.cxc_templates_gTxt('cxc_tpl_should_fix');
+			$cant_write_head    = cxc_templates_gTxt('cxc_tpl_not_writable');
+			$cant_write_text    = cxc_templates_gTxt('cxc_tpl_chmod_write').'</p><pre><code>    chmod 777 %1\$s</code></pre><p>'.cxc_templates_gTxt('cxc_tpl_problem_fix');
+			$cant_read_head     = cxc_templates_gTxt('cxc_tpl_not_readable');
+			$cant_read_text     = cxc_templates_gTxt('cxc_tpl_chmod_read').'</p><pre><code>    chmod 777 %%1\$s</code></pre><p>'.cxc_templates_gTxt('cxc_tpl_problem_fix');
+			$wrong_file_head	= cxc_templates_gTxt('cxc_tpl_wrong_file_type');
+			$wrong_file_text	= cxc_templates_gTxt('cxc_tpl_corrupt_file');
 
 			$this->_config['error_missing_dir'] =   sprintf(
 														$this->_config['error_template'],
@@ -663,7 +663,7 @@ if (!defined('txpinterface'))
 			}
 
 			print '
-				<h1 class="cxc-tpl-slide-head"><a id="exporting-details" title="Click here to open/close detailed list of export events.">Template Export: Current</a> &lt;/&gt;</h1>
+				<h1 class="cxc-tpl-slide-head"><a id="exporting-details" title="'.cxc_templates_gTxt('cxc_tpl_open_close').'">'.cxc_templates_gTxt('cxc_tpl_export_current').'</a> &lt;/&gt;</h1>
 				<div class="cxc-tpl-slide-body">
 				<blockquote>
 			';
@@ -712,11 +712,11 @@ if (!defined('txpinterface'))
 						}
 						fclose($f);
 						print '
-						<li><span class="cxc-tpl-success">Successfully exported</span> '.$config['nice_name'].' \''.$row['name'].'\' to \''.$nicefilename.'\'</li>
+						<li><span class="cxc-tpl-success">'.cxc_templates_gTxt('cxc_tpl_export_success').'</span> '.$config['nice_name'].' \''.$row['name'].'\' to \''.$nicefilename.'\'</li>
 						';
 					} else {
 						print '
-						<li><span class="cxc-tpl-failure">Failed exporting</span> '.$config['nice_name'].' \''.$row['name'].'\' to \''.$nicefilename.'\'</li>
+						<li><span class="cxc-tpl-failure">'.cxc_templates_gTxt('cxc_tpl_export_failed').'</span> '.$config['nice_name'].' \''.$row['name'].'\' to \''.$nicefilename.'\'</li>
 						';
 					}
 				}
@@ -809,7 +809,7 @@ if (!defined('txpinterface'))
 			if (!set_pref('cxc_tpl_current', $dir, 'publish', 2)){
 				print '
 					<ul class="results">
-						<li><span class="cxc-tpl-failure">Unable to update</span> entry for current template in the database, '.str_replace('_', ' ', $dir).' template information will be unavailable.</li>
+						<li>'.cxc_templates_gTxt('cxc_tpl_update_unable').' '.str_replace('_', ' ', $dir).' '.cxc_templates_gTxt('cxc_tpl_update_none').'</li>
 					</ul>
 					<br />
 				';
@@ -827,9 +827,8 @@ if (!defined('txpinterface'))
 				Auto export into `preimport-data`
 			*/
 			print '
-				<h1 class="cxc-tpl-slide-head"><a id="processing-backup" title="Click here to open/close detailed list of backup events.">Template Processing</a> &lt;/&gt;</h1>
+				<h1 class="cxc-tpl-slide-head"><a id="processing-backup" title="'.cxc_templates_gTxt('cxc_tpl_open_close').'">'.cxc_templates_gTxt('cxc_tpl_processing').'</a> &lt;/&gt;</h1>
 				<div class="cxc-tpl-slide-body">
-				<blockquote>
 			';
 			$pre_dir = $this->_config['full_base_path']. DIRECTORY_SEPARATOR .'preimport-data';
 			if (is_dir($pre_dir)) {
@@ -848,23 +847,22 @@ if (!defined('txpinterface'))
 			}
 			if (!is_dir($pre_dir)){					
 				print '
-					<p>The `<strong>preimport-data</strong>` template directory has been successfully removed from the `<strong>'.$this->_config['base_dir'].'</strong>` directory so a new backup can be written to replace previous template backups.</p>
+					<p>'.cxc_templates_gTxt('cxc_tpl_pre_remove').$this->_config['base_dir'].cxc_templates_gTxt('cxc_tpl_pre_newback').'</p>
 				';
 			} else {
 				print '
-					<p>The `<strong>preimport-data</strong>` template directory was not removed, the backup may contain additional files from previous backups. Your current template data will be added to `<strong>preimport-data</strong>` for future use.</p>
+					<p>'.cxc_templates_gTxt('cxc_tpl_pre_failed').'</p>
 				';
 			}
 			print '
-				<p><strong>Note:</strong> <em>installing another template will overwrite the current `<strong>preimport-data</strong>` so rename the directory to something else after it is exported to preserve a more permanent backup.</em></p>
-				</blockquote>
+				<p>'.cxc_templates_gTxt('cxc_tpl_pre_note').'</p>
 				</div>
 			';
 
 			$this->export('preimport-data');
 
 			print '
-				<h1 class="cxc-tpl-slide-head"><a id="importing-details" title="Click here to open/close detailed list of import events.">Template Import: <span class="cxc-tpl-capital">'.str_replace('_', ' ', $dir).'</span></a> &lt;/&gt;</h1>
+				<h1 class="cxc-tpl-slide-head"><a id="importing-details" title="'.cxc_templates_gTxt('cxc_tpl_open_close').'">'.cxc_templates_gTxt('cxc_tpl_template_import').' <span class="cxc-tpl-capital">'.str_replace('_', ' ', $dir).'</span></a> &lt;/&gt;</h1>
 				<div class="cxc-tpl-slide-body">
 				<blockquote>
 			';
@@ -947,20 +945,20 @@ if (!defined('txpinterface'))
 						//$success = true;
 						if ($success == 1) {
 							print '
-						<li><span class="cxc-tpl-success">Successfully imported</span> file "'.$filename.'"</li>
+						<li><span class="cxc-tpl-success">'.cxc_templates_gTxt('cxc_tpl_import_success').'</span> file "'.$filename.'"</li>
 							';
 						} else {
 							if ($type == 'sections' && $import_full == 1){
 								print '
-						<li><span class="cxc-tpl-failure">Skipped importing</span> file "'.$filename.'"</li>
+						<li><span class="cxc-tpl-failure">'.cxc_templates_gTxt('cxc_tpl_import_skipped').'</span> file "'.$filename.'"</li>
 								';
 							} elseif ($import_full == 1){
 								print '
-						<li><span class="cxc-tpl-failure">Skipped importing</span> "'.$filename.'", it was already present.</li>
+						<li><span class="cxc-tpl-failure">'.cxc_templates_gTxt('cxc_tpl_import_skipped').'</span> "'.$filename.cxc_templates_gTxt('cxc_tpl_import_present').'</li>
 								';
 							} else {
 								print '
-						<li><span class="cxc-tpl-failure">Failed importing</span> file "'.$filename.'"</li>
+						<li><span class="cxc-tpl-failure">'.cxc_templates_gTxt('cxc_tpl_import_failed').'</span> file "'.$filename.'"</li>
 								';
 							}
 						}
@@ -978,7 +976,7 @@ if (!defined('txpinterface'))
 			';
 			if (file_exists($basedir. DIRECTORY_SEPARATOR .'DESIGNER.txt')){
 				print '
-				<h1 class="cxc-tpl-slide-head" title="Click here to see additional information from the imported templates designer."><a id="additional-info">Additional Information</a> &lt;/&gt;</h1>
+				<h1 class="cxc-tpl-slide-head" title="'.cxc_templates_gTxt('cxc_tpl_add_click').'"><a id="additional-info">'.cxc_templates_gTxt('cxc_tpl_add_info').'</a> &lt;/&gt;</h1>
 				<div class="cxc-tpl-slide-body">'.
 					file_get_contents($basedir. DIRECTORY_SEPARATOR .'DESIGNER.txt').'
 				</div>
@@ -1009,11 +1007,11 @@ if (!defined('txpinterface'))
 				$zip->unzipAll($templates_base_dir);
 				$zip->__destroy($full_temp_dir);
 				@unlink($full_temp_dir);
-				print '<li><span class="cxc-tpl-success">Successfully uploaded</span> file "'.$fileName.'"</li>';
+				print '<li><span class="cxc-tpl-success">'.cxc_templates_gTxt('cxc_tpl_upload_success').'</span> file "'.$fileName.'"</li>';
 			} else {
 				$zip->__destroy($full_temp_dir);
 				@unlink($full_temp_dir);
-				print '<li><span class="cxc-tpl-failure">Failed removing </span> file "'.$fileName.'" the temporary files.</li>';
+				print '<li>'.cxc_templates_gTxt('cxc_tpl_move_fail').$fileName.cxc_templates_gTxt('cxc_tpl_move_temp').'</li>';
 			}
 			print '
 				</ul>
@@ -1056,7 +1054,7 @@ if (!defined('txpinterface'))
 			global $prefs;
 
 			$tpl_pre = $tpl_dir. DIRECTORY_SEPARATOR .'preview';
-			$tpl_alt = str_replace('_',' ',$prefs['cxc_tpl_current']).' Template Preview';
+			$tpl_alt = str_replace('_',' ',$prefs['cxc_tpl_current']).' '.cxc_templates_gTxt('cxc_tpl_preview_text');
 			$readme = $tpl_dir. DIRECTORY_SEPARATOR .'README.txt';
 			$design = $tpl_dir. DIRECTORY_SEPARATOR .'DESIGNER.txt';
 			
@@ -1070,21 +1068,21 @@ if (!defined('txpinterface'))
 					$tpl_preview = '../'.$this->_config['base_dir'].'/'.$prefs['cxc_tpl_current'].'/preview.png';
 				}
 	
-				print '<h2 class="cxc-tpl-capital">'.str_replace('_',' ',$prefs['cxc_tpl_current']).' Template</h2>';
+				print '<h2 class="cxc-tpl-capital">'.str_replace('_',' ',$prefs['cxc_tpl_current']).' '.cxc_templates_gTxt('cxc_tpl_template').'</h2>';
 				if (isset($tpl_preview)) {
 					print '<p class="cxc-tpl-default"><img src="'.$tpl_preview.'" width="200px" height="auto" alt="'.$tpl_alt.'" /></p>';
 				} else {
-					print '<p class="cxc-tpl-padded">No Preview Image Available</p>';
+					print '<p class="cxc-tpl-padded">'.cxc_templates_gTxt('cxc_tpl_preview_none').'</p>';
 				}
 				if (file_exists($readme) || file_exists($design)) {
 					print form(''.
 							graf(
-								fInput('submit', 'go', 'Template Documentation', 'smallerbox').
+								fInput('submit', 'go', ''.cxc_templates_gTxt('cxc_tpl_preview_docs').'', 'smallerbox').
 								eInput('cxc_templates').sInput('docs')
 							)
 					);
 				} else {
-					print '<p class="cxc-tpl-smaller">(<em><span class="cxc-tpl-capital">'.str_replace('_',' ',$prefs['cxc_tpl_current']).'</span> was the last template imported</em>)</p>';					
+					print '<p class="cxc-tpl-smaller">'.cxc_templates_gTxt('cxc_tpl_preview_note').str_replace('_',' ',$prefs['cxc_tpl_current']).cxc_templates_gTxt('cxc_tpl_preview_last').'</p>';					
 				}
 			}
 		}
@@ -1093,7 +1091,7 @@ if (!defined('txpinterface'))
 			global $prefs;
 
 			$tpl_pre = $tpl_dir. DIRECTORY_SEPARATOR .'preview';
-			$tpl_alt = str_replace('_',' ',$dir).' Template Preview';
+			$tpl_alt = str_replace('_',' ',$dir).' '.cxc_templates_gTxt('cxc_tpl_preview_text');
 			if (is_dir($tpl_dir)){
 
 				if ($img_size = @getimagesize($tpl_pre.'.gif')) {
@@ -1106,16 +1104,16 @@ if (!defined('txpinterface'))
 	
 				if ($dir == '') {
 					print '
-					<h2>Top Level "<strong>'.str_replace('_',' ',$this->_config['base_dir']).'</strong>" Directory</h2>
-					<p class="cxc-tpl-smaller"><strong>Note:</strong> <em class="cxc-tpl-failure">this will remove all templates.</em></p>				
+					<h2>'.cxc_templates_gTxt('cxc_tpl_top_level').str_replace('_',' ',$this->_config['base_dir']).cxc_templates_gTxt('cxc_tpl_top_dir').'</h2>
+					<p class="cxc-tpl-smaller">'.cxc_templates_gTxt('cxc_tpl_top_remove').'</p>				
 					';
 				} else {
-					print '<h2 class="cxc-tpl-capital">'.str_replace('_',' ',$dir).' Template</h2>';
+					print '<h2 class="cxc-tpl-capital">'.str_replace('_',' ',$dir).' '.cxc_templates_gTxt('cxc_tpl_top_template').'</h2>';
 				}
 				if (isset($tpl_preview)) {
 					print '<p class="cxc-tpl-default"><img src="'.$tpl_preview.'" width="200px" height="auto" alt="'.$tpl_alt.'" /></p>';
 				} else {
-					print '<p class="cxc-tpl-padded">No Preview Image Available</p>';
+					print '<p class="cxc-tpl-padded">'.cxc_templates_gTxt('cxc_tpl_preview_none').'</p>';
 				}
 			}
 		}
@@ -1130,7 +1128,7 @@ if (!defined('txpinterface'))
 						);
 			$tpl_dir = $prefs['path_to_site']. DIRECTORY_SEPARATOR .$this->_config['base_dir']. DIRECTORY_SEPARATOR .$prefs['cxc_tpl_current'];
 			$tpl_pre = $tpl_dir. DIRECTORY_SEPARATOR .'preview';
-			$tpl_alt = str_replace('_',' ',$prefs['cxc_tpl_current']).' Template Preview';
+			$tpl_alt = str_replace('_',' ',$prefs['cxc_tpl_current']).' '.cxc_templates_gTxt('cxc_tpl_preview_text');
 			$readme = $basedir. DIRECTORY_SEPARATOR .'README.txt';
 			$design = $basedir. DIRECTORY_SEPARATOR .'DESIGNER.txt';
 
@@ -1147,11 +1145,11 @@ if (!defined('txpinterface'))
 					$tpl_preview = '../'.$this->_config['base_dir'].'/'.$prefs['cxc_tpl_current'].'/preview.png';
 				}
 	
-				print '<h2 class="cxc-tpl-capital">Template Preview Image</h2>';
+				print '<h2 class="cxc-tpl-capital">'.cxc_templates_gTxt('cxc_tpl_preview_img').'</h2>';
 				if (isset($tpl_preview)) {
 					print '<p><img src="'.$tpl_preview.'" width="200px" height="auto" alt="'.$tpl_alt.'" /></p>';
 				} else {
-					print '<p class="cxc-tpl-padded">No Preview Image Available</p>';
+					print '<p class="cxc-tpl-padded">'.cxc_templates_gTxt('cxc_tpl_preview_none').'</p>';
 				}
 				print '
 					<br />
@@ -1168,7 +1166,7 @@ if (!defined('txpinterface'))
 			}
 			if (file_exists($design)){
 				print '
-					<h1>Additional Information</h1>
+					<h1>'.cxc_templates_gTxt('cxc_tpl_add_info').'</h1>
 					<div>'.
 						file_get_contents($design).'
 					</div>
@@ -1200,18 +1198,18 @@ if (!defined('txpinterface'))
 					header ("Pragma: no-cache");
 					header ("Expires: 0");
 					if (!readfile($to)){
-						print 'Error, there was a problem creating the zip file for the template directory.';
+						print cxc_templates_gTxt('cxc_tpl_error_zip_dir');
 					}
 					if (!unlink($to)) {
-						print 'Error, there was a problem removing the zip file after the download.';
+						print cxc_templates_gTxt('cxc_tpl_error_zip_remove');
 					}
 		
 					return true;
 				} else {
-					print 'Error, could not finalise the archive.';
+					print cxc_templates_gTxt('cxc_tpl_error_zip_final');
 				}
 			} else {
-				print 'Error, could not create the '.$to.' archive file';
+				print cxc_templates_gTxt('cxc_tpl_error_zip_failed').' '.$to.' '.cxc_templates_gTxt('cxc_tpl_error_zip_archive');
 			}
 			return false;
 		}
@@ -1953,6 +1951,119 @@ if (!defined('txpinterface'))
 		function appendCentralDir($filename,$properties){
 			$this->centraldirs[$filename] = $properties;
 		}
+	} 
+
+/*
+	PLUGIN CODE::LANGUAGE SUPPORT = cxc_templates_gTxt('')
+	-------------------------------------------------------------
+*/
+	function cxc_templates_gTxt($what, $atts = array()) {
+		$lang = array(
+			'cxc_tpl_templates_tab' => 'Templates',
+			'cxc_tpl_process' => 'Process Templates',
+			'cxc_tpl_preferences' => 'Plugin Preferences',
+			'cxc_tpl_dbupdate' => '<span class="cxc-tpl-failure">Database update failed</span> entry for current template will be unavailable.',
+			'cxc_tpl_return' => 'Click here to return to the template manager.',
+			'cxc_tpl_delete_confirm' => 'Delete Directory Confirmation',
+			'cxc_tpl_remove_before' => 'This will completely remove the "<strong>',
+			'cxc_tpl_remove_after' => '</strong>" directory from your site, click "<strong>GO</strong>" to continue or use the link below to return to the template manager.',
+			'cxc_tpl_removed' => 'Template Removed',
+			'cxc_tpl_the_capital' => 'The <span class="cxc-tpl-capital">',
+			'cxc_tpl_removed_from' => '</span> template directory has been removed from the "',
+			'cxc_tpl_removed_dir' => '" directory.',
+			'cxc_tpl_remove_failed' => 'Unable to Remove Template',
+			'cxc_tpl_not_removed' => '</span> template directory was not removed, this might be due to the server configuration of your host and removal of templates may need to be done manually',
+			'cxc_tpl_template_import' => 'Template Import:',
+			'cxc_tpl_import_failed_before' => '<span class="cxc-tpl-failure">Failed importing</span> the \'<span class="cxc-tpl-capital">',
+			'cxc_tpl_import_failed_after' => '</span>\' template files',
+			'cxc_tpl_upload_import_fail' => 'It was not possible to import the uploaded template because the Zip file contained more than one template or it was already present in the templates directory.',
+			'cxc_tpl_import_template' => 'Import Template',
+			'cxc_tpl_none_before' => 'There are no templates installed in the \'<strong>',
+			'cxc_tpl_none_after' => '</strong>\' directory, please clone your current template or upload a new one.',
+			'cxc_tpl_alternate_dir' => 'Use Alternate Template Directory (<em class="cxc-tpl-failure">not recommended</em>)',
+			'cxc_tpl_alt_adjust' => 'You will need to adjust the location to be used as the template directory by modifying <code>\$cxc_templates[\'base_dir\']</code> in the plugin\'s code. After you have adjusted the plugin\'s code it will try to automatically create the chosen directory for you if not already present in your webroot.',
+			'cxc_tpl_alt_note' => '<strong>Note:</strong> this could affect template assets and result in broken links to css, images, JS and other template files so it is recommended you use the default or select the directory used by the templates designer.',
+			'cxc_tpl_import_which' => 'Which template would you like to import?',
+			'cxc_tpl_import_safe_mode' => 'Use Import Safe Mode (<em class="cxc-tpl-failure">non-destructive</em>)',
+			'cxc_tpl_export_template' => 'Export Template',
+			'cxc_tpl_export_name' => 'Choose a name for the exported template.',
+			'cxc_tpl_delete_template' => 'Delete Template',
+			'cxc_tpl_zip_template' => 'Zip Project Folder',
+			'cxc_tpl_upload_template' => 'Upload Template',
+			'cxc_tpl_upload_select' => 'Please select the template you would like to upload.',
+			'cxc_tpl_upload_import' => 'Import Uploaded Template',
+			'cxc_tpl_advanced_options' => 'Advanced Options',
+			'cxc_tpl_root_install' => 'Web Root Installation (<em class="cxc-tpl-failure">not recommended</em>)',
+			'cxc_tpl_advanced_note' => 'Note:</strong> <em>do not use unless required or you know what you are doing!',
+			'cxc_tpl_feature_unavailable' => 'Feature Unavailable',
+			'cxc_tpl_zlib_enabled_text' => 'If you are seeing this error it means your host compiled version of PHP does not include the ZLib modules. This feature requires the extension ZLib to be enabled, it is compiled by default for most site hosts around the world, and for the PHP Win32 distributions. If this is unavailable you should try speaking to your hosts to have it enabled, if they are not able to provide this for you, I recommend considering a new host. If you choose to remain with them you will have to unzip locally and FTP templates into your template directory, sorry for the inconvenience.',
+			'cxc_tpl_req_dir_created' => 'Required Directories Created',
+			'cxc_tpl_reload_click' => 'Click here to reload this page',
+			'cxc_tpl_reload_display' => 'and display the template manager.',
+			'cxc_tpl_req_dir_missing' => 'Required Directories Missing',
+			'cxc_tpl_req_dir_this' => 'This plugin requires the `<strong>',
+			'cxc_tpl_req_dir_theme' => '</strong>` directory to be located in the webroot for it to function properly and the `<strong>',
+			'cxc_tpl_req_dir_cache' => '</strong>` directory to be in the textpattern directory, either `<strong>',
+			'cxc_tpl_req_dir_or' => '</strong>` directory or `<strong>',
+			'cxc_tpl_req_dir_auto' => '</strong>` directory does not exist, and could not be automatically created.',
+			'cxc_tpl_req_dir_manual' => 'Please create these directories manually using your FTP client, hosting control panel or by running something like ...',
+			'cxc_tpl_req_dir_after' => 'After you have created the missing directories, return to (or reload) this page to display the template manager. You could also adjust the plugin\'s directory by modifying <code>$cxc_templates[\'base_dir\']</code> and/or <code>$cxc_templates[\'cache_dir\']</code> in the plugin\'s code.',
+			'cxc_tpl_add_security' => 'For additional security you may also want to include empty index.html files or adjust your .htaccess for the `<strong>',
+			'cxc_tpl_add_empty_dir' => '</strong>` directory.',
+			'cxc_tpl_webroot' => 'webroot',
+			'cxc_tpl_req_directory' => '</strong>` directory to be located in the `<strong>',
+			'cxc_tpl_req_properly' => '</strong>` directory for it to function properly, the `<strong>',
+			'cxc_tpl_req_manual' => 'Please create the directory manually using your FTP client, hosting control panel or by running something like ...',
+			'cxc_tpl_req_after' => 'After you have created the missing directory, return to (or reload) this page to display the template manager. You could also adjust the plugin\'s directory by modifying <code>$cxc_templates[\'',
+			'cxc_tpl_req_code' => '\']</code> in the plugin\'s code.',
+			'cxc_tpl_secure_dir' => 'For additional security you may also want to include empty index.html files or adjust your .htaccess for the directories.',
+			'cxc_tpl_template_dir' => 'The template directory `<strong>',
+			'cxc_tpl_would_you' => 'Would you mind creating it yourself by running something like ...',
+			'cxc_tpl_should_fix' => 'That should fix the issue. You could also adjust the plugin\'s directory by modifying <code>\$cxc_templates[\'base_dir\']</code> in the plugin\'s code.',
+			'cxc_tpl_not_writable' => 'Template Directory Not Writable',
+			'cxc_tpl_chmod_write' => 'I can\'t seem to write to the template directory \'<strong>%1\$s</strong>\'.  Would you mind running something like ...',
+			'cxc_tpl_not_readable' => 'Template Directory Not Readable',
+			'cxc_tpl_chmod_read' => 'I can\'t seem to read from the template directory \'<strong>%1\$s</strong>\'.  Would you mind running something like ...',
+			'cxc_tpl_problem_fix' => '... to fix the problem?',
+			'cxc_tpl_wrong_file_type' => 'Unsupported File Type',
+			'cxc_tpl_corrupt_file' => 'The file is either corrupt or is an unsupported file type, only zip files are currently supported by this plugin.',
+			'cxc_tpl_open_close' => 'Click here to open/close detailed list of events.',
+			'cxc_tpl_export_current' => 'Template Export: Current',
+			'cxc_tpl_export_success' => 'Successfully exported',
+			'cxc_tpl_export_failed' => 'Failed exporting',
+			'cxc_tpl_update_unable' => '<span class="cxc-tpl-failure">Unable to update</span> entry for current template in the database,',
+			'cxc_tpl_update_none' => 'template information will be unavailabl6e.',
+			'cxc_tpl_processing' => 'Template Processing',
+			'cxc_tpl_pre_remove' => 'The `<strong>preimport-data</strong>` template directory has been successfully removed from the `<strong>',
+			'cxc_tpl_pre_newback' => '</strong>` directory so a new backup can be written to replace previous template backups.',
+			'cxc_tpl_pre_failed' => 'The `<strong>preimport-data</strong>` template directory was not removed, the backup may contain additional files from previous backups. Your current template data will be added to `<strong>preimport-data</strong>` for future use.',
+			'cxc_tpl_pre_note' => '<strong>Note:</strong> <em>installing another template will overwrite the current `<strong>preimport-data</strong>` so rename the directory to something else after it is exported to preserve a more permanent backup.</em>',
+			'cxc_tpl_import_success' => 'Successfully imported',
+			'cxc_tpl_import_skipped' => 'Skipped importing',
+			'cxc_tpl_import_present' => '", it was already present.',
+			'cxc_tpl_import_failed' => 'Failed importing',
+			'cxc_tpl_add_click' => 'Click here to see additional information from the imported templates designer.',
+			'cxc_tpl_add_info' => 'Additional Information',
+			'cxc_tpl_upload_success' => 'Successfully uploaded',
+			'cxc_tpl_move_fail' => '<span class="cxc-tpl-failure">Failed removing </span> file "',
+			'cxc_tpl_move_temp' => '" the temporary files.',
+			'cxc_tpl_preview_text' => 'Template Preview',
+			'cxc_tpl_preview_none' => 'No Preview Image Available',
+			'cxc_tpl_preview_docs' => 'Template Documentation',
+			'cxc_tpl_preview_note' => '(<em><span class="cxc-tpl-capital">',
+			'cxc_tpl_preview_last' => '</span> was the last template imported</em>)',
+			'cxc_tpl_top_level' => 'Top Level "<strong>',
+			'cxc_tpl_top_dir' => '</strong>" Directory',
+			'cxc_tpl_top_remove' => '<strong>Note:</strong> <em class="cxc-tpl-failure">this will remove all templates.</em>',
+			'cxc_tpl_template' => 'Template',
+			'cxc_tpl_preview_img' => 'Template Preview Image',
+			'cxc_tpl_error_zip_dir' => 'Error, there was a problem creating the zip file for the template directory.',
+			'cxc_tpl_error_zip_remove' => 'Error, there was a problem removing the zip file after the download.',
+			'cxc_tpl_error_zip_final' => 'Error, could not finalise the archive.',
+			'cxc_tpl_error_zip_failed' => 'Error, could not create the',
+			'cxc_tpl_error_zip_archive' => 'archive file'
+		);
+		return strtr($lang[$what], $atts);
 	} 
 # --- END PLUGIN CODE ---
 if (0) {

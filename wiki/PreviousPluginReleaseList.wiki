@@ -2,10 +2,12 @@
 
 = Introduction =
 
-These are past releases and considered to be deprecated, they are listed here for reference and to detail the development process.
-
+<p>These are past releases and considered to be deprecated, they are listed here for reference and to detail the development process. There were also hundreds of incremental releases before cxc_templates_v0.0.1 that were not ever made publicly available but some still remain and can be made available upon request. Several were archived by google during development communications with Stuart and other designers and others are archived locally, most versions numbers are much higher than what you will find here on Google Code as I reset the version numbers shortly before starting the Google Code project.</p>
 
 = Details =
+
+== Pre-Alpha Releases ==
+*none available* - _by request only_ <br>
 
 == Alpha Releases ==
 http://cxc-templates.googlecode.com/svn/wiki/assets/cxc_templates_v0.0.1.txt <br>

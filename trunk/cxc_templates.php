@@ -17,7 +17,7 @@ $plugin['name'] = 'cxc_templates';
 // 1 = Plugin help is in raw HTML.  Not recommended.
 # $plugin['allow_html_help'] = 1;
 
-$plugin['version'] = '0.0.9';
+$plugin['version'] = '0.1.0';
 $plugin['author'] = '~cXc~';
 $plugin['author_uri'] = 'http://code.google.com/p/cxc-templates/';
 $plugin['description'] = 'Template engine for TextPattern 4.3.0 with support for forms, pages, plugins, sections, styles and other template specific assets.';
@@ -1981,7 +1981,7 @@ if (!defined('txpinterface'))
 			'cxc_tpl_none_before' => 'There are no templates installed in the \'<strong>',
 			'cxc_tpl_none_after' => '</strong>\' directory, please clone your current template or upload a new one.',
 			'cxc_tpl_alternate_dir' => 'Use Alternate Template Directory (<em class="cxc-tpl-failure">not recommended</em>)',
-			'cxc_tpl_alt_adjust' => 'You will need to adjust the location to be used as the template directory by modifying <code>\$cxc_templates[\'base_dir\']</code> in the plugin\'s code. After you have adjusted the plugin\'s code it will try to automatically create the chosen directory for you if not already present in your webroot.',
+			'cxc_tpl_alt_adjust' => 'You will need to adjust the location to be used as the template directory by modifying <code>$cxc_templates[\'base_dir\']</code> in the plugin\'s code. After you have adjusted the plugin\'s code it will try to automatically create the chosen directory for you if not already present in your webroot.',
 			'cxc_tpl_alt_note' => '<strong>Note:</strong> this could affect template assets and result in broken links to css, images, JS and other template files so it is recommended you use the default or select the directory used by the templates designer.',
 			'cxc_tpl_import_which' => 'Which template would you like to import?',
 			'cxc_tpl_import_safe_mode' => 'Use Import Safe Mode (<em class="cxc-tpl-failure">non-destructive</em>)',

@@ -1,0 +1,31 @@
+#summary Previous version repository.
+
+= Introduction =
+
+These are past releases and considered to be deprecated, they are listed here for reference and to detail the development process.
+
+
+= Details =
+
+== Alpha Releases ==
+http://cxc-templates.googlecode.com/svn/wiki/assets/cxc_templates_v0.0.1.txt
+http://cxc-templates.googlecode.com/svn/wiki/assets/cxc_templates_v0.0.2.txt
+http://cxc-templates.googlecode.com/svn/wiki/assets/cxc_templates_v0.0.2a.txt
+http://cxc-templates.googlecode.com/svn/wiki/assets/cxc_templates_v0.0.3.txt
+http://cxc-templates.googlecode.com/svn/wiki/assets/cxc_templates_v0.0.3_zip.txt
+http://cxc-templates.googlecode.com/svn/wiki/assets/cxc_templates_v0.0.4.txt
+http://cxc-templates.googlecode.com/svn/wiki/assets/cxc_templates_v0.0.4_zip.txt
+http://cxc-templates.googlecode.com/svn/wiki/assets/cxc_templates_v0.0.5.txt
+http://cxc-templates.googlecode.com/svn/wiki/assets/cxc_templates_v0.0.5_zip.txt
+http://cxc-templates.googlecode.com/svn/wiki/assets/cxc_templates_v0.0.6.txt
+http://cxc-templates.googlecode.com/svn/wiki/assets/cxc_templates_v0.0.6_zip.txt
+http://cxc-templates.googlecode.com/svn/wiki/assets/cxc_templates_v0.0.6b.txt
+http://cxc-templates.googlecode.com/svn/wiki/assets/cxc_templates_v0.0.6b_zip.txt
+http://cxc-templates.googlecode.com/svn/wiki/assets/cxc_templates_v0.0.7.txt
+http://cxc-templates.googlecode.com/svn/wiki/assets/cxc_templates_v0.0.7_zip.txt
+http://cxc-templates.googlecode.com/svn/wiki/assets/cxc_templates_v0.0.8.txt
+http://cxc-templates.googlecode.com/svn/wiki/assets/cxc_templates_v0.0.8_zip.txt
+
+== Beta Releases ==
+http://cxc-templates.googlecode.com/svn/wiki/assets/cxc_templates_v0.1.0.txt
+http://cxc-templates.googlecode.com/svn/wiki/assets/cxc_templates_v0.1.0_zip.txt

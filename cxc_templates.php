@@ -17,7 +17,7 @@ $plugin['name'] = 'cxc_templates';
 // 1 = Plugin help is in raw HTML.  Not recommended.
 # $plugin['allow_html_help'] = 1;
 
-$plugin['version'] = '0.1.0';
+$plugin['version'] = '0.1.0b';
 $plugin['author'] = '~cXc~';
 $plugin['author_uri'] = 'http://code.google.com/p/cxc-templates/';
 $plugin['description'] = 'Template engine for TextPattern 4.3.0 with support for forms, pages, plugins, sections, styles and other template specific assets.';
@@ -54,6 +54,7 @@ if (!defined('txpinterface'))
 	PUBLIC PLUGIN CONFIG
 	-------------------------------------------------------------------------
 */
+	// for 'cache_dir' => 'tmp' item, the 'tmp' entry must match the directory on the end of the $prefs['tempdir'] databse entry, this is by default 'tmp'
 	$cxc_templates = array(
 		'base_dir'			=>	'tpl',
 		'cache_dir'			=>	'tmp',
@@ -163,7 +164,7 @@ if (!defined('txpinterface'))
 		}
 
 		$theme_dir = $prefs['path_to_site']. DIRECTORY_SEPARATOR .$template->_config['base_dir'];
-		$cache_dir = $prefs['path_to_site']. DIRECTORY_SEPARATOR .'textpattern'. DIRECTORY_SEPARATOR .$template->_config['cache_dir'];
+		$cache_dir = $prefs['tempdir'];
 		if (is_dir($theme_dir) && is_dir($cache_dir)) {
 
 			$theme_index = $theme_dir. DIRECTORY_SEPARATOR .'index.html';
@@ -262,7 +263,7 @@ if (!defined('txpinterface'))
 					$import_full = ps('import_full');
 					$tpl_alist = scandir($theme_dir);
 					$rel_temp_dir = $template->_config['cache_dir']. DIRECTORY_SEPARATOR . $_FILES['file']['name'];															
-					move_uploaded_file($_FILES['file']['tmp_name'],$rel_temp_dir);
+					move_uploaded_file($_FILES['file']['tmp_name'],str_replace(DIRECTORY_SEPARATOR .$template->_config['cache_dir'].' ',DIRECTORY_SEPARATOR .'',$prefs['tempdir'].' ').$rel_temp_dir);
 					$template->importZip($adv_live, $adv_root, $rel_temp_dir,$_FILES['file']['name']);
 					$tpl_blist = scandir($theme_dir);
 					$newtpl = array_merge(array_diff($tpl_blist,$tpl_alist));
@@ -997,7 +998,7 @@ if (!defined('txpinterface'))
 			} else {
 				$templates_base_dir = $prefs['path_to_site'];
 			}
-			$full_temp_dir = $this->_config['root_path']. DIRECTORY_SEPARATOR ."textpattern". DIRECTORY_SEPARATOR .$rel_temp_dir;
+			$full_temp_dir = str_replace(DIRECTORY_SEPARATOR .$this->_config['cache_dir'].' ',DIRECTORY_SEPARATOR .'',$prefs['tempdir'].' ').$rel_temp_dir;
 
 			print '
 				<ul class="results">
@@ -1061,11 +1062,11 @@ if (!defined('txpinterface'))
 			if (!empty($prefs['cxc_tpl_current']) && is_dir($tpl_dir)){
 
 				if ($img_size = @getimagesize($tpl_pre.'.gif')) {
-					$tpl_preview = '../'.$this->_config['base_dir'].'/'.$prefs['cxc_tpl_current'].'/preview.gif';
+					$tpl_preview = 'http://'.$prefs['siteurl'].'/'.$this->_config['base_dir'].'/'.$prefs['cxc_tpl_current'].'/preview.gif';
 				} elseif ($img_size = @getimagesize($tpl_pre.'.jpg')) {
-					$tpl_preview = '../'.$this->_config['base_dir'].'/'.$prefs['cxc_tpl_current'].'/preview.jpg';
+					$tpl_preview = 'http://'.$prefs['siteurl'].'/'.$this->_config['base_dir'].'/'.$prefs['cxc_tpl_current'].'/preview.jpg';
 				} elseif ($img_size = @getimagesize($tpl_pre.'.png')) {
-					$tpl_preview = '../'.$this->_config['base_dir'].'/'.$prefs['cxc_tpl_current'].'/preview.png';
+					$tpl_preview = 'http://'.$prefs['siteurl'].'/'.$this->_config['base_dir'].'/'.$prefs['cxc_tpl_current'].'/preview.png';
 				}
 	
 				print '<h2 class="cxc-tpl-capital">'.str_replace('_',' ',$prefs['cxc_tpl_current']).' '.cxc_templates_gTxt('cxc_tpl_template').'</h2>';
@@ -1095,11 +1096,11 @@ if (!defined('txpinterface'))
 			if (is_dir($tpl_dir)){
 
 				if ($img_size = @getimagesize($tpl_pre.'.gif')) {
-					$tpl_preview = '../'.$this->_config['base_dir'].'/'.$dir.'/preview.gif';
+					$tpl_preview = 'http://'.$prefs['siteurl'].'/'.$this->_config['base_dir'].'/'.$prefs['cxc_tpl_current'].'/preview.gif';
 				} elseif ($img_size = @getimagesize($tpl_pre.'.jpg')) {
-					$tpl_preview = '../'.$this->_config['base_dir'].'/'.$dir.'/preview.jpg';
+					$tpl_preview = 'http://'.$prefs['siteurl'].'/'.$this->_config['base_dir'].'/'.$prefs['cxc_tpl_current'].'/preview.jpg';
 				} elseif ($img_size = @getimagesize($tpl_pre.'.png')) {
-					$tpl_preview = '../'.$this->_config['base_dir'].'/'.$dir.'/preview.png';
+					$tpl_preview = 'http://'.$prefs['siteurl'].'/'.$this->_config['base_dir'].'/'.$prefs['cxc_tpl_current'].'/preview.png';
 				}
 	
 				if ($dir == '') {
@@ -1138,11 +1139,11 @@ if (!defined('txpinterface'))
 				';
 
 				if ($img_size = @getimagesize($tpl_pre.'.gif')) {
-					$tpl_preview = '../'.$this->_config['base_dir'].'/'.$prefs['cxc_tpl_current'].'/preview.gif';
+					$tpl_preview = 'http://'.$prefs['siteurl'].'/'.$this->_config['base_dir'].'/'.$prefs['cxc_tpl_current'].'/preview.gif';
 				} elseif ($img_size = @getimagesize($tpl_pre.'.jpg')) {
-					$tpl_preview = '../'.$this->_config['base_dir'].'/'.$prefs['cxc_tpl_current'].'/preview.jpg';
+					$tpl_preview = 'http://'.$prefs['siteurl'].'/'.$this->_config['base_dir'].'/'.$prefs['cxc_tpl_current'].'/preview.jpg';
 				} elseif ($img_size = @getimagesize($tpl_pre.'.png')) {
-					$tpl_preview = '../'.$this->_config['base_dir'].'/'.$prefs['cxc_tpl_current'].'/preview.png';
+					$tpl_preview = 'http://'.$prefs['siteurl'].'/'.$this->_config['base_dir'].'/'.$prefs['cxc_tpl_current'].'/preview.png';
 				}
 	
 				print '<h2 class="cxc-tpl-capital">'.cxc_templates_gTxt('cxc_tpl_preview_img').'</h2>';
